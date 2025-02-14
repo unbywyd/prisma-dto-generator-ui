@@ -1,0 +1,114 @@
+<flex-box gap="10px" ai="center" [formGroup]="form">
+    <flex-cell w="170px">
+        <flex-box gap="5px" ai="center">
+            <flex-cell>
+                @if(form.valid) {
+                <s-box fw="700" color="#87EFAC" fz=14px>
+                    <i class="pi pi-check-circle"></i>
+                </s-box>
+                } @else {
+                <s-box fw="700" color="red" fz=14px>
+                    <i class="pi pi-asterisk"></i>
+                </s-box>
+                }
+            </flex-cell>
+            <flex-cell>
+                <s-box fw="700" color="#87EFAC" fz=14px>
+                    {{form.get('name')?.value}}
+                </s-box>
+            </flex-cell>
+            <flex-cell>
+                <s-box fw="700" color="gray" fz=14px>
+                    [{{form.get('type')?.value || 'unknown'}}]
+                </s-box>
+            </flex-cell>
+            @if(form.get('isRequired')?.value) {
+            <flex-cell>
+                <s-box fw="700" fz=14px>
+                    *
+                </s-box>
+            </flex-cell>
+            }
+        </flex-box>
+    </flex-cell>
+    <flex-cell w="150px">
+        <flex-box column gap="2px">
+            <label [for]="id + 'fieldType'">
+                <s-box fz="12px" color="gray" block>
+                    Field Type
+                </s-box>
+            </label>
+            <p-select [id]="id + 'fieldType'" [options]="fieldTypes" formControlName="fieldType"
+                placeholder="Type"></p-select>
+
+        </flex-box>
+
+    </flex-cell>
+
+    @if(isRelation || isEnum) {
+    <flex-cell>
+        @if(isRelation) {
+        <flex-box column gap="2px">
+            <label [for]="id + 'f_model'">
+                <s-box fz="12px" color="gray" block>
+                    Relation
+                </s-box>
+            </label>
+            <p-select [options]="!isExtra ? models : extraModelsOptions" formControlName="type"
+                placeholder="Relation"></p-select>
+        </flex-box>
+        }
+        @if(isEnum) {
+        <flex-box column gap="2px">
+            <label [for]="id + 'f_model'">
+                <s-box fz="12px" color="gray" block>
+                    Enum
+                </s-box>
+            </label>
+            <p-select [options]="!isExtra ? enums : extraEnumsOptions" formControlName="type"
+                placeholder="Enum"></p-select>
+        </flex-box>
+        }
+
+    </flex-cell>
+    }
+    @if(isRelation) {
+    <flex-cell w="170px">
+        <flex-box column gap="2px">
+            <label [for]="id + 'f_rname'">
+                <s-box fz="12px" color="gray" block>
+                    Relation Name
+                </s-box>
+            </label>
+            <input pInputText [id]="id + 'f_rname'" placeholder="Relation Name" formControlName="relationName"
+                autocomplete="off" />
+        </flex-box>
+
+    </flex-cell>
+    }
+    <flex-cell g="1"></flex-cell>
+    <flex-cell>
+        <flex-box column gap="2px">
+            <label [for]="id + 'f_required'">
+                <s-box fz="12px" color="gray" block>
+                    Is Required
+                </s-box>
+            </label>
+            <p-checkbox [id]="id + 'f_required'" formControlName="isRequired" binary="true"></p-checkbox>
+
+        </flex-box>
+
+    </flex-cell>
+    <flex-cell>
+        <flex-box column gap="2px">
+            <label [for]="id + 'f_is_extra'">
+                <s-box fz="12px" color="gray" block>
+                    Is Extra
+                </s-box>
+            </label>
+            <p-checkbox [id]="id + 'f_is_extra'" formControlName="isExtra" binary="true"></p-checkbox>
+
+        </flex-box>
+
+    </flex-cell>
+</flex-box>

@@ -1,0 +1,17 @@
+.app-container {
+  min-height: 100vh;
+  height: 100%;
+  > flex-grid {
+    height: 100%;
+  }
+}
+.lazy-panel {
+  display: none;
+  &.visible {
+    display: block;
+  }
+}
+.scrollbox {
+  overflow-y: auto;
+  max-height: calc(100vh - 160px);
+}

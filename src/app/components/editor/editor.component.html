@@ -1,0 +1,4 @@
+<div class="editor-container" #editorContainer>
+    <ngx-monaco-editor (ngModelChange)="modelChanged($event)" (onInit)="onEditorInit($event)" style="height: 100%" [options]="editorOptions"
+        [(ngModel)]="value"></ngx-monaco-editor>
+</div>

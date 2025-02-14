@@ -3,6 +3,7 @@
   "version": "0.0.0",
   "scripts": {
     "ng": "ng",
+    "generate": "openapi-generator-cli generate -i http://localhost:3100/docs-json -g typescript-angular -o src/generated/openapi --additional-properties=ngVersion=19,npmName=restClient,supportsES6=true,withInterfaces=true",
     "start": "ng serve",
     "build": "ng build",
     "watch": "ng build --watch --configuration development",
@@ -18,6 +19,15 @@
     "@angular/platform-browser": "^19.0.0",
     "@angular/platform-browser-dynamic": "^19.0.0",
     "@angular/router": "^19.0.0",
+    "@openapitools/openapi-generator-cli": "^2.16.2",
+    "@primeng/themes": "^19.0.5",
+    "@types/jsoneditor": "^9.9.5",
+    "flex-layout-system": "^2.0.2",
+    "jsoneditor": "^10.1.2",
+    "monaco-editor": "^0.52.2",
+    "ngx-monaco-editor-v2": "^19.0.2",
+    "primeicons": "^7.0.0",
+    "primeng": "^19.0.5",
     "rxjs": "~7.8.0",
     "tslib": "^2.3.0",
     "zone.js": "~0.15.0"
@@ -33,6 +43,8 @@
     "karma-coverage": "~2.2.0",
     "karma-jasmine": "~5.1.0",
     "karma-jasmine-html-reporter": "~2.1.0",
-    "typescript": "~5.6.2"
+    "typescript": "~5.6.2",
+    "vite": "^6.0.11",
+    "vite-plugin-monaco-editor": "^1.1.0"
   }
 }
