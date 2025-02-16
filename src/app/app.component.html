@@ -252,7 +252,7 @@
                   <!-- Первая часть модели которые можно включить -->
                   @if(modelsCanBeAddedToInput.length > 0) {
                   <flex-grid gap="5px">
-                    <flex-box>
+                    <flex-box wrap>
                       @for(model of modelsCanBeAddedToInput; track model.name) {
                       <flex-cell>
                         <p-button [label]="model.name" (onClick)="useModel(model, 'input')" icon="pi pi-plus"
@@ -393,7 +393,7 @@
                   <!-- Первая часть модели которые можно включить -->
                   @if(modelsCanBeAddedToOutput.length > 0) {
                   <flex-grid gap="5px">
-                    <flex-box>
+                    <flex-box wrap>
                       @for(model of modelsCanBeAddedToOutput; track model.name) {
                       <flex-cell>
                         <p-button [label]="model.name" (onClick)="useModel(model, 'output')" icon="pi pi-plus"
