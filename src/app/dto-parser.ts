@@ -2,6 +2,7 @@ import { OutputEnumDTO, OutputFieldDTO, OutputModelDTO, OutputSchemaDTO } from "
 
 export type ModelType = OutputModelDTO & {
     type?: "input" | "output" | "extra";
+    isExluded?: boolean;
 }
 
 export type ModelField = OutputFieldDTO & {
@@ -11,6 +12,7 @@ export type ModelField = OutputFieldDTO & {
 interface PrismaClassDTOGeneratorModelConfig {
     excludeFields?: string[]; // Поля, которые нужно исключить из модели
     excludeModels?: string[]; // Модели, которые нужно исключить
+    makeFieldsOptional?: boolean; // Сделать все поля опциональными
     excludeModelFields?: {
         [modelName: string]: string[]; // Исключенные поля для каждой модели
     };
@@ -26,7 +28,7 @@ interface PrismaClassDTOGeneratorModelConfig {
 }
 
 interface PrismaClassDTOGeneratorListModelConfig {
-    pagination?: true; // Включить пагинацию
+    pagination?: boolean; // Включить пагинацию
     outputModelName?: string; // Название модели для массива элементов
     filters?: Array<string | OutputFieldDTO>; // Фильтры для списка
     orderable?: boolean | string[]; // Возможность сортировки или список сортируемых полей
@@ -58,11 +60,10 @@ interface PrismaClassDTOGeneratorExtraConfig {
 export interface PrismaClassDTOGeneratorConfig {
     input: PrismaClassDTOGeneratorModelConfig; // Конфигурация для входных моделей
     output: PrismaClassDTOGeneratorModelConfig; // Конфигурация для выходных моделей
+    strictMode?: boolean; // Строгий режим
     excludeModels?: string[]; // Модели, которые нужно исключить
-    list?: {
-        models: {
-            [modelName: string]: PrismaClassDTOGeneratorListModelConfig; // Конфигурация для списка моделей
-        };
+    lists?: {
+        [modelName: string]: PrismaClassDTOGeneratorListModelConfig; // Конфигурация для списка моделей
     };
     extra?: PrismaClassDTOGeneratorExtraConfig; // Дополнительные модели, перечисления и опции
 }
@@ -73,7 +74,9 @@ export type ListItem = {
     model?: ModelType,
     modelName?: string,
     filters?: Array<OutputFieldDTO>,
-    orderable?: Array<string> | boolean
+    orderable?: Array<string> | boolean,
+    outputModelName?: string,
+    orderableList?: Array<string>,
 }
 
 export type ParsedDTOResult = {
@@ -132,23 +135,26 @@ export function parseDtoSchema(
         )) {
             const prismaFields = prismaModels[modelName] || [];
             const modelFields: OutputFieldDTO[] = fieldsConfig.map(fieldConfig => {
-                if (typeof fieldConfig === 'string') {
-                    const prismaField = prismaFields.find(f => f.name === fieldConfig);
+                const fieldName = typeof fieldConfig === 'string' ? fieldConfig : fieldConfig.name;
+
+                const prismaField = prismaFields.find(f => f.name === fieldName);
+
+                if (typeof fieldConfig === 'string' && prismaField) {
                     return prismaField
-                        ? prismaField
-                        : {
-                            name: fieldConfig,
-                            type: 'String',
-                            isRequired: false
-                        };
+                } else if (typeof fieldConfig !== 'string') {
+                    return {
+                        ...prismaField,
+                        ...fieldConfig,
+                    }
                 } else {
-                    return fieldConfig
+                    return null;
                 }
+
             }) as any;
 
             const model: ModelType = {
                 name: modelName,
-                fields: modelFields,
+                fields: modelFields.filter(f => f) as any,
                 type,
             };
 
@@ -164,27 +170,43 @@ export function parseDtoSchema(
     processModels(dtoSchema.output, 'output');
 
     // Lists
-    if (dtoSchema.list?.models) {
+    if (dtoSchema.lists) {
         for (const [modelName, listConfig] of Object.entries(
-            dtoSchema.list.models
+            dtoSchema.lists
         )) {
-            const prismaFields = prismaModels[modelName] || [];
-            const filters = (listConfig.filters || []).map(filter =>
-                typeof filter === 'string'
-                    ? prismaFields.find(f => f.name === filter) || {
-                        name: filter,
-                        type: 'String'
+            let sourceOutputModelName = listConfig?.outputModelName || modelName;
+
+            let model = outputModels.find(m => m.name === sourceOutputModelName);
+            if (!model) {
+                model = extraModels.find(m => m.name === sourceOutputModelName);
+            }
+            const prismaFields = model?.fields || [];
+            const filters = (listConfig?.filters || []).map(filter => {
+
+                const fieldName = typeof filter === 'string' ? filter : filter.name;
+                const prismaField = prismaFields.find(f => f.name === fieldName);
+                if (typeof filter === 'string') {
+                    return prismaField || null;
+                } else {
+                    return {
+                        ...prismaField,
+                        ...filter,
                     }
-                    : filter
-            );
-            const outputModelName = listConfig.outputModelName || modelName;
-            const model = listConfig.outputModelName ? extraModels.find(m => m.name === modelName) : outputModels.find(m => m.name === modelName);
+                }
+            });
+
+            // extraModels.find(m => m.name === modelName) : outputModels.find(m => m.name === modelName)
+            let outputModelName = listConfig?.outputModelName ? listConfig?.outputModelName : `Output${modelName}`;
+
+            const orderable = listConfig?.orderable == true || Array.isArray(listConfig?.orderable) && listConfig?.orderable.length > 0;
             lists.push({
-                pagination: listConfig.pagination || false,
+                pagination: listConfig?.pagination || false,
                 model: model,
-                modelName: outputModelName,
-                filters: filters as any,
-                orderable: listConfig.orderable || false,
+                outputModelName: outputModelName,
+                modelName: modelName,
+                filters: filters?.filter(f => f) as any,
+                orderable: orderable || false,
+                orderableList: typeof listConfig?.orderable === 'boolean' ? [] : listConfig?.orderable,
             });
         }
     }

@@ -33,124 +33,545 @@
         <flex-cell w="60%">
           <p-menubar [model]="submenus">
             <ng-template #item let-item let-root="root">
-              <a href="#" [class.active]="activeItemId == item.id" class="p-menubar-item-link">
-                <span>{{ item.label }}</span>
+              <a href="#" [class.active]="submenuActiveItemId == item.id" class="p-menubar-item-link">
+                <flex-box gap="5px" ai="center">
+                  <i [class]="item.icon"></i>
+                  <span>{{ item.label }}</span>
+                </flex-box>
               </a>
             </ng-template>
           </p-menubar>
           <space-box size="20px"></space-box>
+
           <div class="scrollbox">
-
-
-
             @if(submenuActiveItemId == '1') {
-            <p-card header="Extra Enums">
-              @if(extraEnums.length > 0) {
-              @for(item of extraEnums; track item.name) {
-              <flex-grid compact gap="10px">
-                <flex-box ai="center">
-                  <flex-cell w="150px">
-                    <s-box block color="#49DE80" fz="18px" fw="700">
-                      <i class="pi pi-flag-fill"></i> {{ item.name }}
-                    </s-box>
+            <flex-grid gap="10px">
+              <flex-box column>
+                <flex-cell>
+                  <label for="#">
+                    Exclude Models
+                  </label>
+                  <space-box size="5px"></space-box>
+                  <p-multiselect (onChange)="excludeModelsChanged($event)" appendTo="body" display="chip"
+                    [options]="prismaModels" [(ngModel)]="excludeModels" optionValue="name" optionLabel="name"
+                    placeholder="Exclude Models" fluid="" />
+                </flex-cell>
+                <flex-cell>
+                  <label for="strictMode">
+                    <p-checkbox inputId="strictMode" [(ngModel)]="strictMode" binary="true"></p-checkbox>
 
-                  </flex-cell>
-                  <flex-cell g="1">
-                    <p-autocomplete (ngModelChange)="onEnumUpdate(item)" [(ngModel)]="item.values"
-                      inputId="multiple-ac-2" multiple fluid [typeahead]="false" />
-                  </flex-cell>
-                  <flex-cell>
-                    <button pButton pRipple icon="pi pi-trash" class="p-button-danger" (click)="removeExtraEnum(item)">
-                    </button>
-                  </flex-cell>
-                </flex-box>
-              </flex-grid>
+                    Strict Mode
+                  </label>
+                </flex-cell>
+              </flex-box>
+            </flex-grid>
+            }
+            @if(submenuActiveItemId == '2') {
+            <p-accordion [value]="['0']" [multiple]="true">
+              <p-accordion-panel value="0">
+                <p-accordion-header>Config</p-accordion-header>
+                <p-accordion-content>
+                  <label for="skipExtraPrefix">
+                    <p-checkbox inputId="skipExtraPrefix" [(ngModel)]="skipExtraPrefix" binary="true"></p-checkbox>
 
-              }
-              } @else {
-              <s-box op=".7" block>
-                <p>No extra enums</p>
-              </s-box>
-              }
-              <space-box size="5px"></space-box>
-              <button (click)="showAddEnumDialog = true" type="button" pButton pRipple severity="success">
-                Add Enum
-              </button>
-            </p-card>
-            <space-box size="5px"></space-box>
-            <p-card header="Extra Models">
-              @if(extraModels.length > 0) {
-              @for(item of extraModels; track item.name) {
-              <s-box block>
-                <flex-box gap="5px" jc="space-between" ai="center">
-                  <flex-cell>
-                    <s-box mbe="10px" fz="18px" color="#49DE80" fw="700" block>
-                      <i class="pi pi-flag-fill"></i>
-                      {{item.name}}
-                    </s-box>
-                  </flex-cell>
-                  <flex-cell>
-                    <flex-box gap="5px" ai="center">
-                      <flex-cell>
-                        <p-select [options]="modelTypes" (onChange)="extraModelTypeChanged(item)"
-                          [(ngModel)]="item.type" placeholder="Select a Type" required="" />
+                    Skip extra prefix
+                  </label>
+                </p-accordion-content>
+              </p-accordion-panel>
+              <p-accordion-panel value="1">
+                <p-accordion-header>
+                  Extra Enums
+                </p-accordion-header>
+                <p-accordion-content>
+                  @if(extraEnums.length > 0) {
+                  @for(item of extraEnums; track item.name) {
+                  <flex-grid compact gap="10px">
+                    <flex-box ai="center">
+                      <flex-cell w="150px">
+                        <s-box block color="#49DE80" fz="18px" fw="700">
+                          <i class="pi pi-flag-fill"></i> {{ item.name }}
+                        </s-box>
+
+                      </flex-cell>
+                      <flex-cell g="1">
+                        <p-autocomplete (ngModelChange)="onEnumUpdate(item)" [(ngModel)]="item.values"
+                          inputId="multiple-ac-2" multiple fluid [typeahead]="false" />
                       </flex-cell>
                       <flex-cell>
                         <button pButton pRipple icon="pi pi-trash" class="p-button-danger"
-                          (click)="removeExtraModel(item)">
+                          (click)="removeExtraEnum(item)">
                         </button>
                       </flex-cell>
                     </flex-box>
-                    @if(item.type !== 'input' && item.type !== 'output') {
-                    <s-box fz="12px" color="red" mb="2px" block>
-                      <i class="pi pi-exclamation-triangle"></i> Only input and output types are supported
+                  </flex-grid>
+                  }
+                  } @else {
+                  <s-box op=".7" block>
+                    <p>No extra enums</p>
+
+                  </s-box>
+                  }
+                  <space-box size="5px"></space-box>
+                  <button (click)="showAddEnumDialog = true" type="button" pButton pRipple severity="success">
+                    Add Enum
+                  </button>
+
+                </p-accordion-content>
+              </p-accordion-panel>
+              <p-accordion-panel value="2">
+                <p-accordion-header>Extra Models</p-accordion-header>
+                <p-accordion-content>
+
+                  <button pButton (click)="toAddModel()" pRipple severity="success">
+                    Add Model
+                  </button>
+                  <space-box size="10px"></space-box>
+                  @if(extraModels.length > 0) {
+                  @for(item of extraModels; track item.name) {
+                  <s-box block>
+                    <flex-box gap="5px" jc="space-between" ai="center">
+                      <flex-cell>
+                        <s-box mbe="10px" fz="18px" color="#49DE80" fw="700" block>
+                          <i class="pi pi-flag-fill"></i>
+                          {{item.name}}
+                        </s-box>
+                      </flex-cell>
+                      <flex-cell>
+                        <flex-box gap="5px" ai="center">
+                          <flex-cell>
+                            <p-select [options]="modelTypes" (onChange)="extraModelTypeChanged(item)"
+                              [(ngModel)]="item.type" placeholder="Select a Type" required="" />
+                          </flex-cell>
+                          <flex-cell>
+                            <button pButton pRipple icon="pi pi-trash" class="p-button-danger"
+                              (click)="removeExtraModel(item)">
+                            </button>
+                          </flex-cell>
+                        </flex-box>
+                        @if(item.type !== 'input' && item.type !== 'output') {
+                        <s-box fz="12px" color="red" mb="2px" block>
+                          <i class="pi pi-exclamation-triangle"></i> Only input and output types are supported
+                        </s-box>
+                        }
+                      </flex-cell>
+
+                    </flex-box>
+                    <space-box size="5px"></space-box>
+                    @if(item.fields.length > 0) {
+                    @for(field of item.fields; track field.name) {
+                    <s-box block mbe="10px">
+                      <flex-box gap="20px" ai="flex-start">
+                        <flex-cell g="1">
+                          <app-field (onChange)="updateExtraField(item, $event)"
+                            [modelNames]="item.type === 'input' ? avialableInputModelNames : avialableOutputModelNames"
+                            [enums]="allEnums" [extraModelNames]="extraModelNames" [field]="field"></app-field>
+                        </flex-cell>
+                        <flex-cell>
+                          <s-box block pbs="22px">
+                            <button pButton pRipple icon="pi pi-trash" (click)="deleteExtraField(item, field)"
+                              class="p-button-danger" [text]="true">
+                            </button>
+                          </s-box>
+                        </flex-cell>
+                      </flex-box>
                     </s-box>
                     }
-                  </flex-cell>
+                    } @else {
+                    <s-box op=".7" block>
+                      <p>No fields</p>
+                    </s-box>
+                    }
+                    <space-box size="10px"></space-box>
+                    <button pButton (click)="toAddField(item, 'extra')" pRipple severity="success">
+                      Add Field
+                    </button>
 
-                </flex-box>
-                <space-box size="5px"></space-box>
-                @if(item.fields.length > 0) {
-                @for(field of item.fields; track field.name) {
-                <s-box block mbe="10px" br="6px" pd="10px" bgc="#121212">
-                  <flex-box gap="20px" ai="flex-start">
-                    <flex-cell g="1">
-                      <app-field (onChange)="updateExtraField(item, $event)" [prismaData]="prismaData"
-                        [extraEnums]="extraEnums" [extraModels]="extraModels" [field]="field"></app-field>
-                    </flex-cell>
-                    <flex-cell>
-                      <s-box block pbs="22px">
-                        <button pButton pRipple icon="pi pi-trash" (click)="deleteExtraField(item, field)"
-                          class="p-button-danger" [text]="true">
-                        </button>
-                      </s-box>
-                    </flex-cell>
+                  </s-box>
+                  <s-box mb="10px" block>
+                    <s-box block h="2px" bgc="#FFF" op=".1"></s-box>
+                  </s-box>
+                  }
+                  } @else {
+                  <s-box op=".7" block>
+                    <p>No extra models</p>
+                  </s-box>
+                  }
+                  <space-box size="10px"></space-box>
+                  <button pButton (click)="toAddModel()" pRipple severity="success">
+                    Add Model
+                  </button>
+                </p-accordion-content>
+              </p-accordion-panel>
+            </p-accordion>
+            }
+            @if(submenuActiveItemId == '3') {
+            <p-accordion [value]="['0']" [multiple]="true">
+              <p-accordion-panel value="0">
+                <p-accordion-header>Input Config</p-accordion-header>
+                <p-accordion-content>
+                  <flex-grid gap="10px">
+                    <flex-box column>
+
+                      <flex-cell>
+                        <label for="makeFieldsOptional">
+                          <p-checkbox inputId="makeFieldsOptional" [(ngModel)]="makeFieldsOptionalInput"
+                            binary="true"></p-checkbox>
+                          Make Fields Optional
+                        </label>
+                      </flex-cell>
+                      <flex-cell>
+                        <label for="includeRelations">
+                          <p-checkbox inputId="includeRelations" [(ngModel)]="includeRelationsInput"
+                            binary="true"></p-checkbox>
+                          Include Relation Fields
+                        </label>
+                      </flex-cell>
+                      <flex-cell>
+                        <label for="#">
+                          Exclude Models
+                        </label>
+                        <p-multiselect appendTo="body" display="chip" (onChange)="excludeInputModelsChanged($event)"
+                          [options]="avialableModels" [(ngModel)]="excludeModelsInput" optionValue="name"
+                          optionLabel="name" placeholder="Exclude Models" fluid="" />
+                      </flex-cell>
+                      <flex-cell>
+                        <label for="excludeFieldsInput">
+                          Exclude Fields
+                        </label>
+                        <p-autocomplete (ngModelChange)="onExcludeInputFieldsChanged($event)"
+                          [(ngModel)]="excludeFieldsInput" multiple fluid [typeahead]="false" />
+                      </flex-cell>
+                    </flex-box>
+                  </flex-grid>
+                </p-accordion-content>
+              </p-accordion-panel>
+              <p-accordion-panel value="1">
+                <p-accordion-header>Models</p-accordion-header>
+                <p-accordion-content>
+
+                  <!-- Первая часть модели которые можно включить -->
+                  @if(modelsCanBeAddedToInput.length > 0) {
+                  <flex-grid gap="5px">
+                    <flex-box>
+                      @for(model of modelsCanBeAddedToInput; track model.name) {
+                      <flex-cell>
+                        <p-button [label]="model.name" (onClick)="useModel(model, 'input')" icon="pi pi-plus"
+                          pRipple></p-button>
+                      </flex-cell>
+                      }
+                    </flex-box>
+                  </flex-grid>
+                  <space-box size="5px"></space-box>
+                  <s-box block h="2px" bgc="#FFF" op=".1"></s-box>
+                  <space-box size="20px"></space-box>
+                  } @else {
+                  <p>
+                    No models available to add, check the exclude models list
+                  </p>
+                  }
+
+                  @if(inputModels.length > 0) {
+
+                  <flex-box gap="10px" ai="center" jc="flex-start">
+                    <s-box color="gray">
+                      Filter
+                    </s-box>
+                    <input type="text" placeholder="Search" pInputText [(ngModel)]="inputModelsFilter" />
                   </flex-box>
-                </s-box>
+                  <space-box size="10px"></space-box>
+                  @for(item of filteredInputModels; track item.name) {
+                  <s-box block>
+                    <flex-box gap="5px" jc="space-between" ai="center">
+                      <flex-cell>
+                        <s-box mbe="10px" fz="18px" color="#49DE80" fw="700" block>
+                          <i class="pi pi-flag-fill"></i>
+                          {{item.name}}
+                        </s-box>
+                      </flex-cell>
+                      <flex-cell>
+                        <flex-box gap="5px" ai="center">
+                          <flex-cell>
+                            <button pButton pRipple icon="pi pi-trash" class="p-button-danger"
+                              (click)="removeInputModel(item)">
+                            </button>
+                          </flex-cell>
+                        </flex-box>
+                      </flex-cell>
+                    </flex-box>
+                    <space-box size="5px"></space-box>
+                    @if(item.fields.length > 0) {
+                    @for(field of item.fields; track field.name) {
+                    <s-box block mbe="10px">
+                      <flex-box gap="20px" ai="flex-start">
+                        <flex-cell g="1">
+                          <app-field (onChange)="updateInputField(item, $event)" [modelNames]="avialableInputModelNames"
+                            [enums]="allEnums" [extraModelNames]="extraModelNames" [field]="field"></app-field>
+                        </flex-cell>
+                        <flex-cell>
+                          <s-box block pbs="22px">
+                            <button pButton pRipple icon="pi pi-trash" (click)="removeInputField(item, field)"
+                              class="p-button-danger" [text]="true">
+                            </button>
+                          </s-box>
+                        </flex-cell>
+                      </flex-box>
+                    </s-box>
+                    }
+                    } @else {
+                    <s-box op=".7" block>
+                      <p>No fields</p>
+                    </s-box>
+                    }
+                    <space-box size="10px"></space-box>
+                    <button pButton (click)="toAddField(item, 'input')" pRipple severity="success">
+                      Add Field
+                    </button>
+
+                  </s-box>
+                  <s-box mb="10px" block>
+                    <s-box block h="2px" bgc="#FFF" op=".1"></s-box>
+                  </s-box>
+                  } @empty {
+                  <s-box op=".7" block>
+                    Not found
+                  </s-box>
+                  }
+                  } @else {
+                  <s-box op=".7" block>
+                    <p>No Input models</p>
+                  </s-box>
+                  }
+                </p-accordion-content>
+              </p-accordion-panel>
+            </p-accordion>
+            }
+            @if(submenuActiveItemId == '4') {
+            <p-accordion [value]="['0']" [multiple]="true">
+              <p-accordion-panel value="0">
+                <p-accordion-header>Input Config</p-accordion-header>
+                <p-accordion-content>
+                  <flex-grid gap="10px">
+                    <flex-box column>
+
+                      <flex-cell>
+                        <label for="makeFieldsOptionalOutput">
+                          <p-checkbox inputId="makeFieldsOptionalOutput" [(ngModel)]="makeFieldsOptionalOutput"
+                            binary="true"></p-checkbox>
+                          Make Fields Optional
+                        </label>
+                      </flex-cell>
+                      <flex-cell>
+                        <label for="includeRelationsOutput">
+                          <p-checkbox inputId="includeRelationsOutput" [(ngModel)]="includeRelationsOutput"
+                            binary="true"></p-checkbox>
+                          Include Relation Fields
+                        </label>
+                      </flex-cell>
+                      <flex-cell>
+                        <label for="#">
+                          Exclude Models
+                        </label>
+                        <p-multiselect appendTo="body" display="chip" (onChange)="excludeOutputModelsChanged($event)"
+                          [options]="avialableModels" [(ngModel)]="excludeModelsOutput" optionValue="name"
+                          optionLabel="name" placeholder="Exclude Models" fluid="" />
+                      </flex-cell>
+                      <flex-cell>
+                        <label for="excludeFieldsOutput">
+                          Exclude Fields
+                        </label>
+                        <p-autocomplete (ngModelChange)="onExcludeOutputFieldsChanged($event)"
+                          [(ngModel)]="excludeFieldsOutput" multiple fluid [typeahead]="false" />
+                      </flex-cell>
+                    </flex-box>
+                  </flex-grid>
+                </p-accordion-content>
+              </p-accordion-panel>
+              <p-accordion-panel value="1">
+                <p-accordion-header>Models</p-accordion-header>
+                <p-accordion-content>
+
+                  <!-- Первая часть модели которые можно включить -->
+                  @if(modelsCanBeAddedToOutput.length > 0) {
+                  <flex-grid gap="5px">
+                    <flex-box>
+                      @for(model of modelsCanBeAddedToOutput; track model.name) {
+                      <flex-cell>
+                        <p-button [label]="model.name" (onClick)="useModel(model, 'output')" icon="pi pi-plus"
+                          pRipple></p-button>
+                      </flex-cell>
+                      }
+                    </flex-box>
+                  </flex-grid>
+                  <space-box size="5px"></space-box>
+                  <s-box block h="2px" bgc="#FFF" op=".1"></s-box>
+                  <space-box size="20px"></space-box>
+                  } @else {
+                  <p>
+                    No models available to add, check the exclude models list
+                  </p>
+                  }
+
+                  @if(outputModels.length > 0) {
+                  <flex-box gap="10px" ai="center" jc="flex-start">
+                    <s-box color="gray">
+                      Filter
+                    </s-box>
+                    <input type="text" placeholder="Search" pInputText [(ngModel)]="outputModelsFilter" />
+                  </flex-box>
+                  <space-box size="10px"></space-box>
+                  @for(item of filteredOutputModels; track item.name) {
+                  <s-box block>
+                    <flex-box gap="5px" jc="space-between" ai="center">
+                      <flex-cell>
+                        <s-box mbe="10px" fz="18px" color="#49DE80" fw="700" block>
+                          <i class="pi pi-flag-fill"></i>
+                          {{item.name}}
+                        </s-box>
+                      </flex-cell>
+                      <flex-cell>
+                        <flex-box gap="5px" ai="center">
+                          <flex-cell>
+                            <button pButton pRipple icon="pi pi-trash" class="p-button-danger"
+                              (click)="removeOutputModel(item)">
+                            </button>
+                          </flex-cell>
+                        </flex-box>
+                      </flex-cell>
+                    </flex-box>
+                    <space-box size="5px"></space-box>
+                    @if(item.fields.length > 0) {
+                    @for(field of item.fields; track field.name) {
+                    <s-box block mbe="10px">
+                      <flex-box gap="20px" ai="flex-start">
+                        <flex-cell g="1">
+                          <app-field (onChange)="updateOutputField(item, $event)"
+                            [modelNames]="avialableOutputModelNames" [enums]="allEnums"
+                            [extraModelNames]="extraModelNames" [field]="field"></app-field>
+                        </flex-cell>
+                        <flex-cell>
+                          <s-box block pbs="22px">
+                            <button pButton pRipple icon="pi pi-trash" (click)="removeOutputField(item, field)"
+                              class="p-button-danger" [text]="true">
+                            </button>
+                          </s-box>
+                        </flex-cell>
+                      </flex-box>
+                    </s-box>
+                    }
+                    } @else {
+                    <s-box op=".7" block>
+                      <p>No fields</p>
+                    </s-box>
+                    }
+                    <space-box size="10px"></space-box>
+                    <button pButton (click)="toAddField(item, 'output')" pRipple severity="success">
+                      Add Field
+                    </button>
+
+                  </s-box>
+                  <s-box mb="10px" block>
+                    <s-box block h="2px" bgc="#FFF" op=".1"></s-box>
+                  </s-box>
+                  } @empty {
+                  <s-box op=".7" block>
+                    Not found
+                  </s-box>
+                  }
+                  } @else {
+                  <s-box op=".7" block>
+                    <p>No Output models</p>
+                  </s-box>
+                  }
+
+
+                </p-accordion-content>
+              </p-accordion-panel>
+            </p-accordion>
+
+            }
+            @if(submenuActiveItemId == '5') {
+            <p-card header="Lists">
+              <p-button pRipple label="Add List" type="button" (click)="toAddList()" icon="pi pi-plus"
+                class="p-button-success"></p-button>
+              <space-box size="10px"></space-box>
+              @for(item of lists; track item.modelName) {
+              <s-box pd="5px" block>
+                <flex-box ai="flex-start" gap="15px">
+                  <flex-cell w="165px">
+                    <s-box fz="18px" fw="700" color="#49DE80">
+                      <i class="pi pi-list"></i> {{item.modelName}}
+                    </s-box>
+                  </flex-cell>
+                  <flex-cell w="120px">
+                    <label for="#">
+                      Output Model
+                    </label>
+                    <space-box size="2px"></space-box>
+                    <p-select fluid appendTo="body" (onChange)="listFieldUpdated(item)" [options]="avialableListModels"
+                      [(ngModel)]="item.outputModelName" placeholder="Model" />
+                  </flex-cell>
+                  <flex-cell>
+                    <label>
+                      Pagination
+                      <br>
+                      <p-checkbox (onChange)="listFieldUpdated(item)" [(ngModel)]="item.pagination"
+                        binary="true"></p-checkbox>
+                    </label>
+                  </flex-cell>
+                  <flex-cell>
+                    <label>
+                      Orderable <br>
+                      <p-checkbox (onChange)="listFieldUpdated(item)" [(ngModel)]="item.orderable"
+                        binary="true"></p-checkbox>
+                    </label>
+                  </flex-cell>
+                  @if(item.orderable) {
+                  <flex-cell>
+                    <label for="#">Order Enum options</label>
+                    <p-autocomplete (ngModelChange)="orderableListChanged($event, item)"
+                      [(ngModel)]="item.orderableList" multiple fluid [typeahead]="false" />
+                  </flex-cell>
+                  }
+                  <flex-cell g="1"></flex-cell>
+                  <flex-cell>
+                    <button [text]="true" pButton pRipple icon="pi pi-trash" class="p-button-danger"
+                      (click)="removeList(item)">
+                    </button>
+                  </flex-cell>
+                </flex-box>
+                <space-box size="10px"></space-box>
+                @if(item.filters?.length) {
+                <s-box fz="14px" block mbe="5px">Filters</s-box>
+                @for(filter of item.filters; track filter.name) {
+                <flex-box gap="20px" ai="center">
+                  <flex-cell g="1">
+                    <app-field (onChange)="updateListFilter($event, item)" [modelNames]="avialableOutputModelNames" [enums]="allEnums"
+                      [extraModelNames]="extraModelNames" [simpleTypesMode]="true" [field]="filter"></app-field>
+                  </flex-cell>
+                  <flex-cell>
+                    <button [text]="true" pButton pRipple icon="pi pi-trash" class="p-button-danger"
+                      (click)="removeListFilter(item, filter)">
+                    </button>
+                  </flex-cell>
+                </flex-box>
                 }
                 } @else {
                 <s-box op=".7" block>
-                  <p>No fields</p>
+                  <p>No filters</p>
                 </s-box>
                 }
-
+                <space-box size="5px"></space-box>
+                <p-button pRipple label="Add Filter" [outlined]="true" type="button"
+                  (click)="addFilterFieldToList(item)"></p-button>
+                <space-box size="10px"></space-box>
               </s-box>
-              <s-box mb="10px" block>
-                <s-box block h="2px" bgc="#FFF" op=".1"></s-box>
-              </s-box>
-              }
-              } @else {
+              } @empty {
               <s-box op=".7" block>
-                <p>No extra models</p>
+                <p>No lists</p>
               </s-box>
-              <button pButton pRipple severity="success">
-                Add Model
-              </button>
               }
             </p-card>
             }
-
-
           </div>
         </flex-cell>
       </flex-box>
@@ -166,14 +587,14 @@
       <flex-cell>
         <label for="enumName">Enum Name</label>
         <space-box size="5px"></space-box>
-        <input id="enumName" type="text" pInputText [(ngModel)]="newEnumName" />
+        <input id="enumName" fluid type="text" pInputText [(ngModel)]="newEnumName" />
       </flex-cell>
       <flex-cell>
         <label for="enumValues">Enum Values</label>
         <space-box size="5px"></space-box>
 
-        <p-autocomplete (ngModelChange)="onSelectEnums($event)" [(ngModel)]="newEnumValues" inputId="multiple-ac-2"
-          multiple fluid [typeahead]="false" />
+        <p-autocomplete (ngModelChange)="onSelectEnums()" [(ngModel)]="newEnumValues" inputId="multiple-ac-2" multiple
+          fluid [typeahead]="false" />
       </flex-cell>
     </flex-box>
   </flex-grid>
@@ -185,3 +606,107 @@
     <button pButton type="button" label="Save" type="button" (click)="addEnum($event)"></button>
   </flex-box>
 </p-dialog>
+
+<p-dialog header="Add New Model" [(visible)]="showAddModelDialog" [style]="{ width: '500px' }">
+  <flex-grid gap="5px">
+    <flex-box column>
+      <flex-cell w="100%">
+        <label for="newModelName">Model Name</label>
+        <space-box size="5px"></space-box>
+        <input fluid="" id="newModelName" type="text" pInputText [(ngModel)]="newModelName" />
+      </flex-cell>
+      <flex-cell w="100%">
+        <label for="newModelType">Model Type</label>
+        <space-box size="5px"></space-box>
+        <p-select fluid appendTo="body" [options]="modelTypes" [(ngModel)]="newModelType" placeholder="Select a Type" />
+      </flex-cell>
+    </flex-box>
+  </flex-grid>
+  <space-box size="10px"></space-box>
+  <flex-box gap="10px">
+
+    <button pButton type="button" label="Cancel" type="button" (click)="showAddModelDialog = false"
+      class="p-button-text"></button>
+    <button pButton type="button" label="Save" type="button" (click)="addModel($event)"></button>
+  </flex-box>
+</p-dialog>
+
+<p-dialog header="Add New List" [(visible)]="showAddListDialog" [style]="{ width: '500px' }">
+  <flex-grid gap="5px">
+    <flex-box column>
+      <flex-cell w="100%">
+        <label for="newListName">List Name</label>
+        <space-box size="5px"></space-box>
+        <input fluid="" id="newListName" type="text" pInputText [(ngModel)]="newListName" />
+      </flex-cell>
+    </flex-box>
+  </flex-grid>
+  <space-box size="10px"></space-box>
+  <flex-box gap="10px">
+    <button pButton type="button" label="Cancel" type="button" (click)="showAddListDialog = false"
+      class="p-button-text"></button>
+    <button pButton type="button" label="Save" type="button" (click)="addList($event)"></button>
+  </flex-box>
+</p-dialog>
+
+<p-dialog header="Add New Field" (onHide)="resetNewFieldDialogFields()" [(visible)]="showAddFieldDialog"
+  [style]="{ width: '500px' }">
+  <flex-grid gap="5px">
+    <flex-box column>
+
+      <flex-cell w="100%">
+        <label for="dublicateFieldFromModelType">
+          Duplicate Field From:
+        </label>
+        <space-box size="5px"></space-box>
+        <p-select fluid appendTo="body" inputId="dublicateFieldFromModelType" [options]="dubplicateFieldFromOptions"
+          [(ngModel)]="dublicateFieldFromModelType" />
+      </flex-cell>
+      @if(dublicateFieldFromModelType) {
+      <flex-cell w="100%">
+        <label for="dublicateFieldFromModel">
+          Model
+        </label>
+        <space-box size="5px"></space-box>
+        <p-select [filter]="true" filterBy="name" fluid appendTo="body" inputId="dublicateFieldFromModel"
+          optionLabel="name" [options]="dubplicateFieldFromModels" [(ngModel)]="dublicateFieldFromModel" />
+      </flex-cell>
+      }
+      @if(dublicateFieldFromModel && dubplicateFieldOptions.length) {
+      <flex-cell w="100%">
+        <label for="dublicateField">
+          Field
+        </label>
+        <space-box size="5px"></space-box>
+        <p-select [filter]="true" filterBy="name" fluid appendTo="body" (onChange)="dublicateFieldChanged($event)"
+          inputId="dublicateField" optionLabel="name" [options]="dubplicateFieldOptions" [(ngModel)]="dublicateField">
+          <ng-template let-item #item>
+            {{item.name}} ({{item.type}})
+          </ng-template>
+        </p-select>
+      </flex-cell>
+      }
+
+      <flex-cell w="100%">
+        <label for="newFieldName">Field Name</label>
+        <space-box size="5px"></space-box>
+        <input fluid="" id="newFieldName" type="text" pInputText [(ngModel)]="newFieldName" />
+      </flex-cell>
+    </flex-box>
+  </flex-grid>
+  <space-box size="10px"></space-box>
+  <flex-box gap="10px">
+
+    <button pButton type="button" label="Cancel" type="button" (click)="showAddModelDialog = false"
+      class="p-button-text"></button>
+    @if(!currentListItem) {
+    <button pButton type="button" label="Add Field" type="button" [disabled]="!newFieldName"
+      (click)="addModelField($event)"></button>
+    } @else {
+    <button pButton type="button" label="Add Filter" type="button" [disabled]="!newFieldName"
+      (click)="addListField($event)"></button>
+    }
+
+  </flex-box>
+</p-dialog>
+<p-toast />

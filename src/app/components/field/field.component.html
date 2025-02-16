@@ -38,41 +38,36 @@
                     Field Type
                 </s-box>
             </label>
-            <p-select [id]="id + 'fieldType'" [options]="fieldTypes" formControlName="fieldType"
+            <p-select appendTo="body" [id]="id + 'fieldType'" [options]="fieldTypes" formControlName="fieldType"
                 placeholder="Type"></p-select>
 
         </flex-box>
-
     </flex-cell>
 
-    @if(isRelation || isEnum) {
-    <flex-cell>
-        @if(isRelation) {
-        <flex-box column gap="2px">
-            <label [for]="id + 'f_model'">
-                <s-box fz="12px" color="gray" block>
-                    Relation
-                </s-box>
-            </label>
-            <p-select [options]="!isExtra ? models : extraModelsOptions" formControlName="type"
-                placeholder="Relation"></p-select>
-        </flex-box>
-        }
-        @if(isEnum) {
-        <flex-box column gap="2px">
-            <label [for]="id + 'f_model'">
-                <s-box fz="12px" color="gray" block>
-                    Enum
-                </s-box>
-            </label>
-            <p-select [options]="!isExtra ? enums : extraEnumsOptions" formControlName="type"
-                placeholder="Enum"></p-select>
-        </flex-box>
-        }
-
-    </flex-cell>
-    }
     @if(isRelation) {
+    <flex-cell>
+        <flex-box column gap="2px">
+            <label [for]="id + 'f_is_extra'">
+                <flex-box ai="center" gap="10px">
+                    <s-box fz="12px" color="gray">
+                        Relation
+                    </s-box>
+
+                    <s-box block lh="1" fz="12px" color="gray">
+                        <flex-box ai="center" gap="5px">
+                            <p-checkbox [inputId]="id + 'f_is_extra'" formControlName="isExtra"
+                                binary="true"></p-checkbox>
+                            <span>Extra</span>
+                        </flex-box>
+                    </s-box>
+                </flex-box>
+
+            </label>
+            <p-select appendTo="body" [options]="modelNameOptions" formControlName="type"
+                placeholder="Relation"></p-select>
+
+        </flex-box>
+    </flex-cell>
     <flex-cell w="170px">
         <flex-box column gap="2px">
             <label [for]="id + 'f_rname'">
@@ -83,30 +78,43 @@
             <input pInputText [id]="id + 'f_rname'" placeholder="Relation Name" formControlName="relationName"
                 autocomplete="off" />
         </flex-box>
-
     </flex-cell>
     }
+
+    @if(isEnum) {
+    <flex-cell>
+        <flex-box column gap="2px">
+            <label [for]="id + 'f_model'">
+                <s-box fz="12px" color="gray" block>
+                    Enum
+                </s-box>
+            </label>
+            <p-select appendTo="body" [options]="enums" formControlName="type" placeholder="Enum"></p-select>
+        </flex-box>
+    </flex-cell>
+    }
+
     <flex-cell g="1"></flex-cell>
     <flex-cell>
         <flex-box column gap="2px">
             <label [for]="id + 'f_required'">
-                <s-box fz="12px" color="gray" block>
-                    Is Required
+                <s-box fz="14px" lh="1.1" color="gray" block>
+                    (*)
                 </s-box>
             </label>
-            <p-checkbox [id]="id + 'f_required'" formControlName="isRequired" binary="true"></p-checkbox>
+            <p-checkbox [inputId]="id + 'f_required'" formControlName="isRequired" binary="true"></p-checkbox>
 
         </flex-box>
 
     </flex-cell>
     <flex-cell>
         <flex-box column gap="2px">
-            <label [for]="id + 'f_is_extra'">
+            <label [for]="id + 'f_is_list'">
                 <s-box fz="12px" color="gray" block>
-                    Is Extra
+                    Array[]
                 </s-box>
             </label>
-            <p-checkbox [id]="id + 'f_is_extra'" formControlName="isExtra" binary="true"></p-checkbox>
+            <p-checkbox [inputId]="id + 'f_is_list'" formControlName="isList" binary="true"></p-checkbox>
 
         </flex-box>
 

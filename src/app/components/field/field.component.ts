@@ -39,25 +39,17 @@ function relationNameValidator(control: AbstractControl) {
   standalone: true
 })
 export class FieldComponent {
-  @Input() extraEnums: Array<OutputEnumDTO> = [];
-  @Input() extraModels: Array<ModelType> = [];
-  models: Array<string> = [];
-  enums: Array<string> = [];
-  extraModelsOptions: Array<string> = [];
-  extraEnumsOptions: Array<string> = [];
+  @Input() extraModelNames: Array<string> = [];
+  @Input() modelNames: Array<string> = [];
+  @Input() simpleTypesMode: boolean = false;
+  @Input() enums: Array<string> = [];
 
-  @Input() prismaData: OutputSchemaDTO | null = null;
   id: string = '';
   @Output() onChange: EventEmitter<ModelField> = new EventEmitter<ModelField>();
 
 
-  get activeTypeModels() {
-    if (this.isEnum) {
-      return this.isExtra ? this.extraEnumsOptions : this.enums;
-    } else if (this.isRelation) {
-      return this.isExtra ? this.extraModelsOptions : this.models;
-    }
-    return this.models;
+  get modelNameOptions() {
+    return this.isExtra ? this.extraModelNames : this.modelNames;
   }
   name: string = '';
 
@@ -68,11 +60,25 @@ export class FieldComponent {
     }),
     type: new FormControl('', [relationNameValidator, (control: AbstractControl) => {
       const form = this.form;
-      const options = this.activeTypeModels;
+      const type = control.value;
+
       if (form) {
         const fieldTypeValue = form.get('fieldType')?.value;
-        if (fieldTypeValue === 'Relation' && !options.includes(control.value)) {
-          return { requiredForRelation: true };
+        const isEnum = fieldTypeValue === 'Enum';
+        const isRelation = fieldTypeValue === 'Relation';
+        if (!isEnum && !isRelation) {
+          return null;
+        }
+        if (fieldTypeValue === 'Relation') {
+          const options = this.modelNameOptions;
+          if (!options.includes(type)) {
+            return { requiredForRelation: true };
+          }
+        } else if (fieldTypeValue === 'Enum') {
+          const options = this.enums;
+          if (!options.includes(type)) {
+            return { requiredForEnum: true };
+          }
         }
       }
       return null;
@@ -82,23 +88,15 @@ export class FieldComponent {
     isRequired: new FormControl(false),
     relationName: new FormControl('', relationNameValidator),
     isExtra: new FormControl(false),
+    isList: new FormControl(false),
   });
 
-  ngOnChanges(changes: SimpleChanges) {
-    if ("prismaData" in changes) {
-      this.models = this.prismaData?.models.map((model) => model.name) || [];
-      this.enums = this.prismaData?.enums.map((enumItem) => enumItem.name) || [];
-    }
-    if ("extraModels" in changes) {
-      this.extraModelsOptions = this.extraModels.map((model) => model.name);
-    }
-    if ("extraEnums" in changes) {
-      this.extraEnumsOptions = this.extraEnums.map((enumItem) => enumItem.name);
-    }
+  get isRelation(): boolean {
+    return this.form.get('fieldType')?.value === 'Relation';
   }
-
-  isRelation: boolean = false;
-  isEnum: boolean = false;
+  get isEnum(): boolean {
+    return this.form.get('fieldType')?.value === 'Enum';
+  }
   @Input() set field(value: ModelField) {
     let fieldType = value.type;
     if (value.type == "Json") {
@@ -126,9 +124,8 @@ export class FieldComponent {
     this.name = value.name;
 
     value.isRequired = value.isRequired || false;
+    value.isList = value.isList || false;
     value.isExtra = value.isExtra || false;
-    this.isEnum = value.kind == "enum";
-    this.isRelation = value.relationName ? true : false;
 
     this.form.patchValue({
       ...value,
@@ -143,43 +140,39 @@ export class FieldComponent {
   sub1: Subscription | undefined;
   sub2: Subscription | undefined;
   sub3: Subscription | undefined;
+  sub4: Subscription | undefined;
   ngOnInit(): void {
-    this.models = this.prismaData?.models.map((model) => model.name) || [];
-    this.enums = this.prismaData?.enums.map((enumItem) => enumItem.name) || [];
-    this.extraModelsOptions = this.extraModels.map((model) => model.name);
-    this.extraEnumsOptions = this.extraEnums.map((enumItem) => enumItem.name);
+    this.buildTypes();
     this.id = 'f_' + Math.random().toString(36).substring(7);
 
     this.sub1 = this.form.get('fieldType')?.valueChanges.subscribe((value) => {
-      if (value == "Relation" || value == "Enum") {
-        const type = this.form.get('type')?.value;
-        if (!this.activeTypeModels.includes(type)) {
-          this.form.get('type')?.reset('', { emitEvent: false });
-          this.form.get('type')?.updateValueAndValidity({ emitEvent: false });
-        } else {
-          this.form.get('type')?.setValue(type, { emitEvent: false });
-          this.form.get('type')?.updateValueAndValidity({ emitEvent: false });
-        }
-      } else {
-        this.form.get('type')?.setValue(value, { emitEvent: false });
-        this.form.get('type')?.updateValueAndValidity({ emitEvent: false });
-      }
-      if (value === 'Relation') {
-        this.isRelation = true;
-        this.isEnum = false;
-      } else if (value === 'Enum') {
-        this.isEnum = true;
-        this.isRelation = false;
-      } else {
-        this.isRelation = false;
-        this.isEnum = false;
-      }
-    });
-    this.sub3 = this.form.get('isExtra')?.valueChanges.subscribe((value) => {
       const type = this.form.get('type')?.value;
-      if (!this.activeTypeModels.includes(type)) {
+
+      if (value == "Relation" && !this.modelNameOptions.includes(type)) {
         this.form.get('type')?.reset('', { emitEvent: false });
         this.form.get('type')?.updateValueAndValidity({ emitEvent: false });
+      }
+      if (value == "Enum" && !this.enums.includes(type)) {
+        this.form.get('type')?.reset('', { emitEvent: false });
+        this.form.get('type')?.updateValueAndValidity({ emitEvent: false });
+      }
+      if (type) {
+        if (value !== 'Relation' && value !== 'Enum') {
+          this.form.get('type')?.setValue(value);
+          //this.form.get('relationName')?.updateValueAndValidity({ emitEvent: false });
+        }
+        this.form.get('type')?.updateValueAndValidity({ emitEvent: false });
+      }
+    });
+
+    this.sub3 = this.form.get('isExtra')?.valueChanges.subscribe((value) => {
+      //const type = this.form.get('type')?.value;
+      this.form.get('type')?.reset('', { emitEvent: false });
+      this.form.get('type')?.updateValueAndValidity({ emitEvent: false });
+    });
+    this.sub4 = this.form.get('type')?.valueChanges.subscribe((value) => {
+      if (this.isRelation && value) {
+        this.form.get('relationName')?.setValue(value);
       }
     });
     this.sub2 = this.form.valueChanges.subscribe((value) => {
@@ -197,7 +190,7 @@ export class FieldComponent {
     const field: Partial<ModelField> = {
       name: this.name,
       type: value.type,
-      isRequired: value.isRequired
+      isRequired: value.isRequired,
     };
     if (value.fieldType === 'Relation') {
       field.relationName = value.relationName;
@@ -208,10 +201,16 @@ export class FieldComponent {
     if (value.isExtra) {
       field.isExtra = value.isExtra;
     }
+    if (value.isList) {
+      field.isList = value.isList;
+    }
+
 
     this.onChange.emit(field as ModelField);
   }
-
+  get isFileType() {
+    return this.form.get('fieldType')?.value === 'File';
+  }
   ngOnDestroy() {
     if (this.sub1) {
       this.sub1?.unsubscribe();
@@ -222,6 +221,9 @@ export class FieldComponent {
     if (this.sub3) {
       this.sub3?.unsubscribe();
     }
+    if (this.sub4) {
+      this.sub4?.unsubscribe();
+    }
   }
 
   fieldTypes: Array<string> = [
@@ -231,13 +233,39 @@ export class FieldComponent {
     "Boolean",
     "DateTime",
     "File",
-    //"Json",
-    //"UUID",    
-    //"BigInt",
-    //"Decimal",
     "Enum",
     "Relation"
   ];
+
+  buildTypes() {
+    if (this.simpleTypesMode) {
+      this.fieldTypes = [
+        "String",
+        "Int",
+        "Float",
+        "Boolean",
+        "DateTime",
+        "Enum"
+      ];
+    } else {
+      this.fieldTypes = [
+        "String",
+        "Int",
+        "Float",
+        "Boolean",
+        "DateTime",
+        "File",
+        "Enum",
+        "Relation"
+      ];
+    }
+  }
+
+  ngOnChanges(changes: SimpleChanges) {
+    if ("simpleTypesMode" in changes) {
+      this.buildTypes();
+    }
+  }
 
   constructor() { }
 }

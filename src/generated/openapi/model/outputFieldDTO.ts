@@ -19,5 +19,6 @@ export interface OutputFieldDTO {
     isUnique: boolean;
     isRequired: boolean;
     relationName: string;
+    options?: Record<string, any>;
 }
 
