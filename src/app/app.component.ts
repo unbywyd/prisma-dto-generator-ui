@@ -89,7 +89,7 @@ generator client {
       return {
         ...schema,
         output: {
-          ...schema.output,
+          ...schema.output || {},
           excludeFields: e
         }
       };
@@ -102,7 +102,7 @@ generator client {
       return {
         ...schema,
         input: {
-          ...schema.input,
+          ...schema.input || {},
           excludeFields: e
         }
       };
@@ -219,15 +219,15 @@ generator client {
     return this.dtoData?.input?.makeFieldsOptional ?? false;
   }
   set makeFieldsOptionalInput(value: boolean) {
-    if (!this.dtoData!.input) {
+    /*if (!this.dtoData!.input) {
       this.dtoData!.input = {};
     }
-    this.dtoData!.input.makeFieldsOptional = value;
+    this.dtoData!.input.makeFieldsOptional = value;*/
     this.jsonEditor.updateSourceSchema(schema => {
       return {
         ...schema,
         input: {
-          ...schema.input,
+          ...schema.input || {},
           makeFieldsOptional: value
         }
       };
@@ -237,15 +237,15 @@ generator client {
     return this.dtoData?.input?.includeRelations ?? false;
   }
   set includeRelationsInput(value: boolean) {
-    if (!this.dtoData!.input) {
+    /*if (!this.dtoData!.input) {
       this.dtoData!.input = {};
     }
-    this.dtoData!.input.includeRelations = value;
+    this.dtoData!.input.includeRelations = value;*/
     this.jsonEditor.updateSourceSchema(schema => {
       return {
         ...schema,
         input: {
-          ...schema.input,
+          ...schema.input || {},
           includeRelations: value
         }
       };
@@ -256,15 +256,15 @@ generator client {
     return this.dtoData?.output?.makeFieldsOptional ?? false;
   }
   set makeFieldsOptionalOutput(value: boolean) {
-    if (!this.dtoData!.output) {
+    /*if (!this.dtoData!.output) {
       this.dtoData!.output = {};
     }
-    this.dtoData!.output.makeFieldsOptional = value;
+    this.dtoData!.output.makeFieldsOptional = value;*/
     this.jsonEditor.updateSourceSchema(schema => {
       return {
         ...schema,
         output: {
-          ...schema.output,
+          ...schema.output || {},
           makeFieldsOptional: value
         }
       };
@@ -274,15 +274,15 @@ generator client {
     return this.dtoData?.output?.includeRelations ?? false;
   }
   set includeRelationsOutput(value: boolean) {
-    if (!this.dtoData!.output) {
+    /*if (!this.dtoData!.output) {
       this.dtoData!.output = {};
     }
-    this.dtoData!.output.includeRelations = value;
+    this.dtoData!.output.includeRelations = value;*/
     this.jsonEditor.updateSourceSchema(schema => {
       return {
         ...schema,
         output: {
-          ...schema.output,
+          ...schema.output || {},
           includeRelations: value
         }
       };
@@ -293,20 +293,20 @@ generator client {
     return this.dtoData?.extra?.options?.skipExtraPrefix ?? false;
   }
   set skipExtraPrefix(value: boolean) {
-    if (!this.dtoData!.extra) {
+    /*if (!this.dtoData!.extra) {
       this.dtoData!.extra = {};
     }
     if (!this.dtoData!.extra!.options) {
       this.dtoData!.extra!.options = {};
     }
-    this.dtoData!.extra.options.skipExtraPrefix = value;
+    this.dtoData!.extra.options.skipExtraPrefix = value;*/
     this.jsonEditor.updateExtraOptions({ skipExtraPrefix: value });
   }
   get strictMode() {
     return this.dtoData?.strictMode ?? false;
   }
   set strictMode(value: boolean) {
-    this.dtoData!.strictMode = value;
+    //this.dtoData!.strictMode = value;
     this.jsonEditor.updateSourceSchema(schema => {
       return {
         ...schema,
@@ -528,7 +528,7 @@ generator client {
   excludeModels: Array<string> = [];
   excludeModelsChanged(e: MultiSelectChangeEvent) {
     const models = e.value as Array<string>;
-    this.dtoData!.excludeModels = models;
+    //this.dtoData!.excludeModels = models;
     this.jsonEditor.updateSourceSchema(schema => {
       return {
         ...schema,
@@ -538,12 +538,12 @@ generator client {
   }
   excludeOutputModelsChanged(e: MultiSelectChangeEvent) {
     const models = e.value as Array<string>;
-    this.dtoData!.output!.excludeModels = models;
+    //this.dtoData!.output!.excludeModels = models;
     this.jsonEditor.updateSourceSchema(schema => {
       return {
         ...schema,
         output: {
-          ...schema.output,
+          ...schema.output || {},
           excludeModels: models
         }
       };
@@ -551,12 +551,12 @@ generator client {
   }
   excludeInputModelsChanged(e: MultiSelectChangeEvent) {
     const models = e.value as Array<string>;
-    this.dtoData!.input!.excludeModels = models;
+    //this.dtoData!.input!.excludeModels = models;
     this.jsonEditor.updateSourceSchema(schema => {
       return {
         ...schema,
         input: {
-          ...schema.input,
+          ...schema.input || {},
           excludeModels: models
         }
       };

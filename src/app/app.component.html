@@ -107,7 +107,7 @@
                   }
                   } @else {
                   <s-box op=".7" block>
-                    <p>No extra enums</p>
+                    No extra enums
 
                   </s-box>
                   }
@@ -497,7 +497,7 @@
               @for(item of lists; track item.modelName) {
               <s-box pd="5px" block>
                 <flex-box ai="flex-start" gap="15px">
-                  <flex-cell w="165px">
+                  <flex-cell w="120px">
                     <s-box fz="18px" fw="700" color="#49DE80">
                       <i class="pi pi-list"></i> {{item.modelName}}
                     </s-box>
@@ -525,13 +525,13 @@
                         binary="true"></p-checkbox>
                     </label>
                   </flex-cell>
-                  @if(item.orderable) {
-                  <flex-cell>
+                  <flex-cell w="140px">
+                    @if(item.orderable) {
                     <label for="#">Order Enum options</label>
                     <p-autocomplete (ngModelChange)="orderableListChanged($event, item)"
                       [(ngModel)]="item.orderableList" multiple fluid [typeahead]="false" />
+                    }
                   </flex-cell>
-                  }
                   <flex-cell g="1"></flex-cell>
                   <flex-cell>
                     <button [text]="true" pButton pRipple icon="pi pi-trash" class="p-button-danger"
@@ -542,19 +542,22 @@
                 <space-box size="10px"></space-box>
                 @if(item.filters?.length) {
                 <s-box fz="14px" block mbe="5px">Filters</s-box>
-                @for(filter of item.filters; track filter.name) {
-                <flex-box gap="20px" ai="center">
-                  <flex-cell g="1">
-                    <app-field (onChange)="updateListFilter($event, item)" [modelNames]="avialableOutputModelNames" [enums]="allEnums"
-                      [extraModelNames]="extraModelNames" [simpleTypesMode]="true" [field]="filter"></app-field>
-                  </flex-cell>
-                  <flex-cell>
-                    <button [text]="true" pButton pRipple icon="pi pi-trash" class="p-button-danger"
-                      (click)="removeListFilter(item, filter)">
-                    </button>
-                  </flex-cell>
-                </flex-box>
-                }
+                <s-box block pd="5px" br="6px" bgc="#000">
+                  @for(filter of item.filters; track filter.name) {
+                  <flex-box gap="20px" ai="center">
+                    <flex-cell g="1">
+                      <app-field (onChange)="updateListFilter($event, item)" [modelNames]="avialableOutputModelNames"
+                        [enums]="allEnums" [extraModelNames]="extraModelNames" [simpleTypesMode]="true"
+                        [field]="filter"></app-field>
+                    </flex-cell>
+                    <flex-cell>
+                      <button [text]="true" pButton pRipple icon="pi pi-trash" class="p-button-danger"
+                        (click)="removeListFilter(item, filter)">
+                      </button>
+                    </flex-cell>
+                  </flex-box>
+                  }
+                </s-box>
                 } @else {
                 <s-box op=".7" block>
                   <p>No filters</p>
