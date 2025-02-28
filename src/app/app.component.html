@@ -305,7 +305,7 @@
             </p-accordion>
             }
             @if(submenuActiveItemId == '3') {
-            <p-accordion [value]="['0']" [multiple]="true">
+            <p-accordion [value]="['0', '1']" [multiple]="true">
               <p-accordion-panel value="0">
                 <p-accordion-header>Input Entities</p-accordion-header>
                 <p-accordion-content>
@@ -448,6 +448,7 @@
                   <s-box block h="2px" bgc="#FFF" op=".1"></s-box>
                   <space-box size="20px"></space-box>
                   } @else {
+                  <space-box size="20px"></space-box>
                   <p>
                     No models available to add, check the exclude models list
                   </p>
@@ -548,9 +549,10 @@
                 </p-accordion-content>
               </p-accordion-panel>
             </p-accordion>
+            <space-box size="50px"></space-box>
             }
             @if(submenuActiveItemId == '4') {
-            <p-accordion [value]="['0']" [multiple]="true">
+            <p-accordion [value]="['0', '1']" [multiple]="true">
               <p-accordion-panel value="0">
                 <p-accordion-header>Output Entities</p-accordion-header>
                 <p-accordion-content>
@@ -666,6 +668,7 @@
                   <s-box block h="2px" bgc="#FFF" op=".1"></s-box>
                   <space-box size="20px"></space-box>
                   } @else {
+                  <space-box size="20px"></space-box>
                   <p>
                     No models available to add, check the exclude models list
                   </p>
@@ -767,7 +770,7 @@
                 </p-accordion-content>
               </p-accordion-panel>
             </p-accordion>
-
+            <space-box size="50px"></space-box>
             }
             @if(submenuActiveItemId == '5') {
             <p-card header="Lists">
