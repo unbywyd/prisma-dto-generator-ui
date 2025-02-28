@@ -23,6 +23,7 @@
     "@primeng/themes": "^19.0.5",
     "@types/jsoneditor": "^9.9.5",
     "flex-layout-system": "^2.0.2",
+    "intro.js": "^7.2.0",
     "jsoneditor": "^10.1.2",
     "monaco-editor": "^0.52.2",
     "ngx-monaco-editor-v2": "^19.0.2",

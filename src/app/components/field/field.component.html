@@ -1,5 +1,5 @@
 <flex-box gap="10px" ai="center" [formGroup]="form">
-    <flex-cell w="150px">
+    <flex-cell g="1">
         <flex-box gap="5px" ai="center">
             <flex-cell>
                 @if(form.valid) {
@@ -31,15 +31,15 @@
             }
         </flex-box>
     </flex-cell>
-    <flex-cell w="150px">
+    <flex-cell style="min-width: 150px">
         <flex-box column gap="2px">
             <label [for]="id + 'fieldType'">
                 <s-box fz="12px" color="gray" block>
                     Field Type
                 </s-box>
             </label>
-            <p-select appendTo="body" [id]="id + 'fieldType'" [options]="fieldTypes" formControlName="fieldType"
-                placeholder="Type"></p-select>
+            <p-select [readonly]="isPrismaField" appendTo="body" [id]="id + 'fieldType'" [options]="fieldTypes"
+                formControlName="fieldType" placeholder="Type"></p-select>
 
         </flex-box>
     </flex-cell>
@@ -55,15 +55,15 @@
 
                     <s-box block lh="1" fz="12px" color="gray">
                         <flex-box ai="center" gap="5px">
-                            <p-checkbox [inputId]="id + 'f_is_extra'" formControlName="isExtra"
-                                binary="true"></p-checkbox>
+                            <p-checkbox [readonly]="isPrismaField" [inputId]="id + 'f_is_extra'"
+                                formControlName="isExtra" binary="true"></p-checkbox>
                             <span>Extra</span>
                         </flex-box>
                     </s-box>
                 </flex-box>
 
             </label>
-            <p-select appendTo="body" [options]="modelNameOptions" formControlName="type"
+            <p-select [readonly]="isPrismaField" appendTo="body" [options]="modelNameOptions" formControlName="type"
                 placeholder="Relation"></p-select>
 
         </flex-box>
@@ -75,8 +75,8 @@
                     Relation Name
                 </s-box>
             </label>
-            <input pInputText [id]="id + 'f_rname'" placeholder="Relation Name" formControlName="relationName"
-                autocomplete="off" />
+            <input pInputText [class.readonly]="isPrismaField" [disabled]="isPrismaField" [readonly]="isPrismaField" [id]="id + 'f_rname'" placeholder="Relation Name"
+                formControlName="relationName" autocomplete="off" />
         </flex-box>
     </flex-cell>
     }
@@ -89,12 +89,11 @@
                     Enum
                 </s-box>
             </label>
-            <p-select appendTo="body" [options]="enums" formControlName="type" placeholder="Enum"></p-select>
+            <p-select appendTo="body" [readonly]="isPrismaField" [options]="enums" formControlName="type"
+                placeholder="Enum"></p-select>
         </flex-box>
     </flex-cell>
     }
-
-    <flex-cell g="1"></flex-cell>
     <flex-cell>
         <flex-box column gap="2px">
             <label [for]="id + 'f_required'">
@@ -114,7 +113,7 @@
                     Array[]
                 </s-box>
             </label>
-            <p-checkbox [inputId]="id + 'f_is_list'" formControlName="isList" binary="true"></p-checkbox>
+            <p-checkbox [readonly]="isPrismaField" [inputId]="id + 'f_is_list'" formControlName="isList" binary="true"></p-checkbox>
 
         </flex-box>
 

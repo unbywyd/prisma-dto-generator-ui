@@ -19,6 +19,7 @@ import { FieldComponent } from './components/field/field.component';
 import { MultiSelectChangeEvent, MultiSelectModule } from 'primeng/multiselect';
 import { AccordionModule } from 'primeng/accordion';
 import { ToastModule } from 'primeng/toast';
+import { IntroService } from './intro.service';
 
 
 @Component({
@@ -41,8 +42,11 @@ import { ToastModule } from 'primeng/toast';
   styleUrl: './app.component.scss'
 })
 export class AppComponent {
-  constructor(private messageService: MessageService) {
+  constructor(private messageService: MessageService, private intro: IntroService) {
 
+  }
+  ngAfterViewInit() {
+    this.intro.startTour();
   }
   @ViewChild(JsonEditorComponent) jsonEditor!: JsonEditorComponent;
   title = 'app';
@@ -214,6 +218,99 @@ generator client {
     const merged = new Set([...models, ...extraModels]);
     return Array.from(merged);
   }
+  get excludeIdFieldsInput() {
+    return this.dtoData?.input?.excludeIdFields ?? false;
+  }
+  set excludeIdFieldsInput(value: boolean) {
+    this.jsonEditor.updateSourceSchema(schema => {
+      return {
+        ...schema,
+        input: {
+          ...schema.input || {},
+          excludeIdFields: value
+        }
+      };
+    });
+  }
+
+  get excludeIdRelationFieldsInput() {
+    return this.dtoData?.input?.excludeIdRelationFields ?? false;
+  }
+
+  set excludeIdRelationFieldsInput(value: boolean) {
+    this.jsonEditor.updateSourceSchema(schema => {
+      return {
+        ...schema,
+        input: {
+          ...schema.input || {},
+          excludeIdRelationFields: value
+        }
+      };
+    });
+  }
+
+  get excludeDateAtFieldsInput() {
+    return this.dtoData?.input?.excludeDateAtFields ?? false;
+  }
+  set excludeDateAtFieldsInput(value: boolean) {
+    this.jsonEditor.updateSourceSchema(schema => {
+      return {
+        ...schema,
+        input: {
+          ...schema.input || {},
+          excludeDateAtFields: value
+        }
+      };
+    });
+  }
+
+
+  get excludeDateAtFieldsOutput() {
+    return this.dtoData?.output?.excludeDateAtFields ?? false;
+  }
+
+  set excludeDateAtFieldsOutput(value: boolean) {
+    this.jsonEditor.updateSourceSchema(schema => {
+      return {
+        ...schema,
+        output: {
+          ...schema.output || {},
+          excludeDateAtFields: value
+        }
+      };
+    });
+  }
+
+  get excludeIdRelationFieldsOutput() {
+    return this.dtoData?.output?.excludeIdRelationFields ?? false;
+  }
+
+  set excludeIdRelationFieldsOutput(value: boolean) {
+    this.jsonEditor.updateSourceSchema(schema => {
+      return {
+        ...schema,
+        output: {
+          ...schema.output || {},
+          excludeIdRelationFields: value
+        }
+      };
+    });
+  }
+
+  get excludeIdFieldsOutput() {
+    return this.dtoData?.output?.excludeIdFields ?? false;
+  }
+  set excludeIdFieldsOutput(value: boolean) {
+    this.jsonEditor.updateSourceSchema(schema => {
+      return {
+        ...schema,
+        output: {
+          ...schema.output || {},
+          excludeIdFields: value
+        }
+      };
+    });
+  }
 
   get makeFieldsOptionalInput() {
     return this.dtoData?.input?.makeFieldsOptional ?? false;
@@ -374,6 +471,30 @@ generator client {
   updateListFilter(field: ModelField, item: ListItem) {
     this.jsonEditor.updateListFilter(item.modelName!, field);
   }
+  saveStatus(key: string, bool: boolean) {
+    try {
+      let prev = localStorage.getItem('prisma_dto_temp_data');
+
+      let prevData = prev ? JSON.parse(prev || '{}') : {};
+      prevData[key] = bool ? 'true' : 'false';
+      localStorage.setItem('prisma_dto_temp_data', JSON.stringify(prevData));
+    } catch (e) {
+    }
+  }
+  getStatus(key: string) {
+    try {
+      let prev = localStorage.getItem('prisma_dto_temp_data');
+      let prevData = prev ? JSON.parse(prev || '{}') : {};
+      return prevData[key] === 'true';
+    } catch (e) {
+      return false;
+    }
+  }
+  switchStatus(key: string) {
+    const status = this.getStatus(key);
+    this.saveStatus(key, !status);
+    return !status;
+  }
   resetNewFieldDialogFields() {
     this.newFieldName = "";
     this.currentListItem = null;
@@ -480,6 +601,10 @@ generator client {
     this.newModelType = 'input';
   }
 
+  isPrismaField(modelNama: string, fieldName: string) {
+    return !!this.prismaData?.models?.find((m) => m.name === modelNama)?.fields?.find((f) => f.name === fieldName);
+  }
+
 
   newEnumName: string = "";
   newEnumValues: Array<string> = [];
@@ -562,7 +687,19 @@ generator client {
       };
     });
   }
+  resetAll() {
+    this.lists = [];
+    this.excludeModels = [];
+    this.excludeModelsInput = [];
+    this.excludeModelsOutput = [];
+    this.excludeFieldsInput = [];
+    this.excludeFieldsOutput = [];
+    localStorage.removeItem('prisma_dto_temp_data');
+  }
   parseDTOSchema() {
+    if (!this.dtoData || Object.keys(this.dtoData).length === 0) {
+      this.resetAll();
+    }
     if (this.dtoData && this.prismaData) {
       const data = parseDtoSchema(this.dtoData, this.prismaData!);
       const globalExtendModels = this.dtoData?.excludeModels || [];
@@ -595,13 +732,12 @@ generator client {
         this.excludeFieldsOutput = this.dtoData?.output?.excludeFields;
       }
     }
+
   }
   onDtoChanged(schema: PrismaClassDTOGeneratorConfig) {
     this.dtoData = schema;
     this.parseDTOSchema();
   }
-
-
 
   updateExtraField(model: ModelType, field: ModelField) {
     this.jsonEditor.updateExtraModelField(model.name, field);

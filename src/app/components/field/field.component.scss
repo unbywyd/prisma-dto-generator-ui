@@ -1,5 +1,16 @@
 :host ::ng-deep {
-    .ng-invalid {
-        border-color: red;
+  .ng-invalid {
+    border-color: red;
+  }
+  [ng-reflect-readonly="true"],
+  .readonly {
+    opacity: 0.3;
+    cursor: not-allowed !important;
+    * {
+      pointer-events: none;
     }
+  }
+  .readonly {
+    pointer-events: none;
+  }
 }

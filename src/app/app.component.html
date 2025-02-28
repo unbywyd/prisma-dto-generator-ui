@@ -1,24 +1,43 @@
-<flex-canvas w="100%" pd="20px" class="app-container">
-  <flex-box h="100%" column>
+<flex-canvas w="100%" pd="10px" class="app-container">
+  <flex-box h="100%" id="final-step" column>
     <flex-cell>
       <flex-box>
-        <h1 class="no-mg">
-          <s-box block fz="20px">
-            <span class="icon">🚀</span>
-            <span>Prisma DTO Schema Builder</span>
+        <h1 class="no-mg" id="global-step">
+          <s-box block fz="16px">
+            <flex-box ai="center" gap="5px">
+
+              <span class="icon">🚀</span>
+              <span>Prisma DTO Schema Builder</span> <a href="https://www.npmjs.com/package/prisma-class-dto-generator">
+                <img src="https://img.shields.io/npm/v/prisma-class-dto-generator.svg" alt="NPM Package">
+              </a>
+
+              <s-box pis="5px" op=".7" fz=".6em">
+                by <a class="td-none" href="https://unbywyd.com" target="_blank">Unbywyd</a>
+              </s-box>
+
+            </flex-box>
           </s-box>
         </h1>
       </flex-box>
     </flex-cell>
-    <space-box size="20px" wfull></space-box>
+    <flex-cell class="desc">
+      <h2>This generator is used in <a class="primary" href="https://www.npmjs.com/package/@tsdiapi/cli"
+          target="_blank"><b class="primary">TSDIAPI</b></a> server build!</h2>
+      <p>Try it now: <a class="primary" href="https://www.npmjs.com/package/@tsdiapi/cli"
+          target="_blank">&#64;tsdiapi/cli on NPM</a>
+      </p>
+    </flex-cell>
+    <space-box size="10px" wfull></space-box>
     <flex-cell g="1">
       <flex-box gap="20px" h="100%">
         <flex-cell w="40%">
           <p-menubar [model]="menus">
             <ng-template #item let-item let-root="root">
-              <a href="#" [class.active]="activeItemId == item.id" class="p-menubar-item-link">
+              <a href="#" [id]="item.id == '1' ? 'prisma-schema-editor' : 'json-config-editor'"
+                [class.active]="activeItemId == item.id" class="p-menubar-item-link">
                 <span>{{ item.label }}</span>
               </a>
+
             </ng-template>
           </p-menubar>
           <div class="lazy-panel" [class.visible]="activeItemId == '1'">
@@ -26,12 +45,13 @@
           </div>
 
           <div class="lazy-panel" [class.visible]="activeItemId == '2'">
-            <app-json-editor (valueChange)="onDtoChanged($event)" [(value)]="dtoSchema"></app-json-editor>
+            <app-json-editor [prismaData]="prismaData" (valueChange)="onDtoChanged($event)"
+              [(value)]="dtoSchema"></app-json-editor>
           </div>
 
         </flex-cell>
         <flex-cell w="60%">
-          <p-menubar [model]="submenus">
+          <p-menubar id="ui-constructor" [model]="submenus">
             <ng-template #item let-item let-root="root">
               <a href="#" [class.active]="submenuActiveItemId == item.id" class="p-menubar-item-link">
                 <flex-box gap="5px" ai="center">
@@ -51,10 +71,16 @@
                   <label for="#">
                     Exclude Models
                   </label>
+                  <s-box block class="alert">
+                    <i class="pi pi-info-circle"></i>
+                    Excludes fields from all models in DTO for Input and Output
+                  </s-box>
                   <space-box size="5px"></space-box>
+                  @if(prismaModels.length) {
                   <p-multiselect (onChange)="excludeModelsChanged($event)" appendTo="body" display="chip"
                     [options]="prismaModels" [(ngModel)]="excludeModels" optionValue="name" optionLabel="name"
                     placeholder="Exclude Models" fluid="" />
+                  }
                 </flex-cell>
                 <flex-cell>
                   <label for="strictMode">
@@ -62,6 +88,23 @@
 
                     Strict Mode
                   </label>
+                  <s-box block class="alert">
+                    <flex-box ai="flex-start" gap="10px">
+                      <s-box fz="20px">
+                        <i class="pi pi-info-circle"></i>
+                      </s-box>
+                      <flex-cell>
+                        <h3 class="no-mg">Strict Mode Info</h3>
+                        Enabling this option ensures that models will not be generated at all unless they are explicitly
+                        specified in includeModelFields for each Input and Output type.
+
+                        This mode guarantees that the generator will only include the models and fields defined in the
+                        configuration, preventing unnecessary models from being generated in the project. This helps
+                        keep
+                        your codebase clean and avoids including unwanted models.
+                      </flex-cell>
+                    </flex-box>
+                  </s-box>
                 </flex-cell>
               </flex-box>
             </flex-grid>
@@ -69,25 +112,62 @@
             @if(submenuActiveItemId == '2') {
             <p-accordion [value]="['0']" [multiple]="true">
               <p-accordion-panel value="0">
-                <p-accordion-header>Config</p-accordion-header>
+                <p-accordion-header>About Extra Entities</p-accordion-header>
                 <p-accordion-content>
-                  <label for="skipExtraPrefix">
-                    <p-checkbox inputId="skipExtraPrefix" [(ngModel)]="skipExtraPrefix" binary="true"></p-checkbox>
+                  <s-box block class="alert">
+                    <flex-box ai="flex-start" gap="10px">
+                      <s-box fz="20px">
+                        <i class="pi pi-info-circle"></i>
+                      </s-box>
+                      <flex-cell>
+                        <h3 class="no-mg">Extra Models / Enums</h3>
+                        <div class="extra-models">
+                          <h2>📌 Extra Models / Enums</h2>
+                          <p>This section allows you to <strong>define custom Enums and Models</strong> that <em>do not
+                              exist in Prisma</em>.</p>
 
-                    Skip extra prefix
-                  </label>
+                          <h3>❓ Why is this needed?</h3>
+                          <p>Instead of manually creating DTOs in the project, you can manage all <strong>data
+                              structures in one place</strong>, ensuring a <strong>single responsibility</strong> for
+                            DTOs.</p>
+
+                          <h3>📌 Types of Extra Models</h3>
+                          <ul>
+                            <li><strong>Input Models</strong> – for request data</li>
+                            <li><strong>Output Models</strong> – for response data</li>
+                          </ul>
+
+                          <h3>✅ Example Use Case: OTP Authentication</h3>
+                          <p><strong>Login Input Model</strong> → Includes <code>phone number</code>.</p>
+                          <p><strong>OTP Verification Input Model</strong> → Includes <code>verification code</code>.
+                          </p>
+                          <p><strong>Login Output Model</strong> → Could be:</p>
+                          <ul>
+                            <li>An <strong>existing</strong> <code>UserOutput</code> model.</li>
+                            <li>A <strong>custom extra model</strong> containing an <code>access token</code> +
+                              <code>UserOutput</code> model.
+                            </li>
+                          </ul>
+
+                          <p>With <strong>Extra Models</strong>, you <em>avoid scattered DTOs</em> across the project
+                            and ensure a <strong>consistent API structure</strong>. 🚀</p>
+                        </div>
+
+                      </flex-cell>
+                    </flex-box>
+                  </s-box>
                 </p-accordion-content>
               </p-accordion-panel>
               <p-accordion-panel value="1">
                 <p-accordion-header>
-                  Extra Enums
+                  <div>Extra Enums <s-box op=".5"> (Open to show extra enums)</s-box></div>
                 </p-accordion-header>
                 <p-accordion-content>
                   @if(extraEnums.length > 0) {
                   @for(item of extraEnums; track item.name) {
                   <flex-grid compact gap="10px">
                     <flex-box ai="center">
-                      <flex-cell w="150px">
+                      <flex-cell style="min-width: 150px">
                         <s-box block color="#49DE80" fz="18px" fw="700">
                           <i class="pi pi-flag-fill"></i> {{ item.name }}
                         </s-box>
@@ -119,7 +199,9 @@
                 </p-accordion-content>
               </p-accordion-panel>
               <p-accordion-panel value="2">
-                <p-accordion-header>Extra Models</p-accordion-header>
+                <p-accordion-header>
+                  <div>Extra Models <s-box op=".5"> (Open to show models)</s-box></div>
+                </p-accordion-header>
                 <p-accordion-content>
 
                   <button pButton (click)="toAddModel()" pRipple severity="success">
@@ -131,7 +213,17 @@
                   <s-box block>
                     <flex-box gap="5px" jc="space-between" ai="center">
                       <flex-cell>
-                        <s-box mbe="10px" fz="18px" color="#49DE80" fw="700" block>
+                        <button class="btn" type="button" (click)="switchStatus('extra_model' + item.name)">
+                          @if(!getStatus('extra_model' + item.name)) {
+                          <i class="pi pi-plus"></i>
+                          } @else {
+                          <i class="pi pi-minus"></i>
+                          }
+                        </button>
+                      </flex-cell>
+                      <flex-cell g="1">
+                        <s-box role="button" style="cursor: pointer" tabindex="-1"
+                          (click)="switchStatus('extra_model' + item.name)" fz="18px" color="#49DE80" fw="700" block>
                           <i class="pi pi-flag-fill"></i>
                           {{item.name}}
                         </s-box>
@@ -158,8 +250,9 @@
                     </flex-box>
                     <space-box size="5px"></space-box>
                     @if(item.fields.length > 0) {
+                    @if(getStatus('extra_model' + item.name)) {
                     @for(field of item.fields; track field.name) {
-                    <s-box block mbe="10px">
+                    <s-box block mbe="10px" bgc="#000" pd="10px">
                       <flex-box gap="20px" ai="flex-start">
                         <flex-cell g="1">
                           <app-field (onChange)="updateExtraField(item, $event)"
@@ -176,15 +269,22 @@
                       </flex-box>
                     </s-box>
                     }
-                    } @else {
-                    <s-box op=".7" block>
-                      <p>No fields</p>
-                    </s-box>
-                    }
                     <space-box size="10px"></space-box>
                     <button pButton (click)="toAddField(item, 'extra')" pRipple severity="success">
                       Add Field
                     </button>
+                    }
+
+                    } @else {
+                    <s-box op=".7" block>
+                      <p>No fields</p>
+                    </s-box>
+
+                    <space-box size="10px"></space-box>
+                    <button pButton (click)="toAddField(item, 'extra')" pRipple severity="success">
+                      Add Field
+                    </button>
+                    }
 
                   </s-box>
                   <s-box mb="10px" block>
@@ -207,16 +307,89 @@
             @if(submenuActiveItemId == '3') {
             <p-accordion [value]="['0']" [multiple]="true">
               <p-accordion-panel value="0">
-                <p-accordion-header>Input Config</p-accordion-header>
+                <p-accordion-header>Input Entities</p-accordion-header>
                 <p-accordion-content>
+                  <s-box block class="alert">
+                    <flex-box ai="flex-start" gap="10px">
+                      <s-box fz="20px">
+                        <i class="pi pi-info-circle"></i>
+                      </s-box>
+                      <flex-cell>
+                        <h3 class="no-mg">📥 Input Models Info</h3>
+                        Input models define the structure of incoming request data. They typically do not include
+                        <strong>references</strong> or <strong>timestamp fields</strong> (e.g., createdAt/updatedAt)
+                        since these
+                        are managed by the server.
+
+                        <strong>ID fields should also be excluded</strong>, and various options below allow control over
+                        this behavior.
+                        If <strong>Strict Mode</strong> is enabled, you must explicitly define models and fields.
+
+                        <h4>🔹 Field Types in Input Models</h4>
+                        <ul>
+                          <li><strong>Prisma Fields</strong> – Only the "Required" option can be modified. These fields
+                            can be included/excluded,
+                            but their type cannot be changed.</li>
+                          <li><strong>Extra Fields</strong> – Fully customizable. You can add, remove, or modify their
+                            types.</li>
+                        </ul>
+
+                        <strong>Prisma models can also be extended</strong> with additional fields. This is particularly
+                        useful when handling
+                        <strong>custom input types</strong>, such as <strong>file uploads</strong>.
+
+                        ✅ This generator <strong>fully supports file input types</strong>, making it easier to accept
+                        uploads directly from the client.
+                        Try it now:
+                        <a href="https://www.npmjs.com/package/@tsdiapi/cli" target="_blank">&#64;tsdiapi/cli on NPM</a>
+                        🚀
+                      </flex-cell>
+                    </flex-box>
+                  </s-box>
+
+
                   <flex-grid gap="10px">
                     <flex-box column>
+                      <flex-cell>
+                        <s-box block class="alert warning">
+                          <i class="pi pi-exclamation-triangle"></i>
+                          Attention! These options apply only to the generator, while the client **only emulates** their
+                          behavior.
+                          If you manually add models and fields below, these options will no longer take effect.
+                          Make sure to configure these settings **first**, then define models and fields using the
+                          constructor below.
+                        </s-box>
 
+                      </flex-cell>
                       <flex-cell>
                         <label for="makeFieldsOptional">
                           <p-checkbox inputId="makeFieldsOptional" [(ngModel)]="makeFieldsOptionalInput"
                             binary="true"></p-checkbox>
                           Make Fields Optional
+                        </label>
+                      </flex-cell>
+                      <flex-cell>
+                        <label for="excludeIdFields">
+                          <p-checkbox inputId="excludeIdFields" [(ngModel)]="excludeIdFieldsInput"
+                            binary="true"></p-checkbox>
+                          Exclude Id Fields
+                        </label>
+                      </flex-cell>
+                      <flex-cell>
+                        <label for="excludeIdRelationFields">
+                          <p-checkbox inputId="excludeIdRelationFields" [(ngModel)]="excludeIdRelationFieldsInput"
+                            binary="true"></p-checkbox>
+                          Exclude Reference Id Fields
+                        </label>
+                        <s-box fz=".8em" block color="yellow">The client **only emulates** the behavior of the *Exclude
+                          Reference Id Fields* option by detecting `Id` at the end of field names. However, the
+                          generator will **actually** exclude only keys that are referenced by relations.</s-box>
+                      </flex-cell>
+                      <flex-cell>
+                        <label for="excludeDateAtFields">
+                          <p-checkbox inputId="excludeDateAtFields" [(ngModel)]="excludeDateAtFieldsInput"
+                            binary="true"></p-checkbox>
+                          Exclude Date At Fields
                         </label>
                       </flex-cell>
                       <flex-cell>
@@ -230,6 +403,10 @@
                         <label for="#">
                           Exclude Models
                         </label>
+                        <s-box block class="alert">
+                          <i class="pi pi-info-circle"></i>
+                          Models that will NOT be included in Input generation
+                        </s-box>
                         <p-multiselect appendTo="body" display="chip" (onChange)="excludeInputModelsChanged($event)"
                           [options]="avialableModels" [(ngModel)]="excludeModelsInput" optionValue="name"
                           optionLabel="name" placeholder="Exclude Models" fluid="" />
@@ -238,6 +415,10 @@
                         <label for="excludeFieldsInput">
                           Exclude Fields
                         </label>
+                        <s-box block class="alert">
+                          <i class="pi pi-info-circle"></i>
+                          Excludes fields from all Input Models
+                        </s-box>
                         <p-autocomplete (ngModelChange)="onExcludeInputFieldsChanged($event)"
                           [(ngModel)]="excludeFieldsInput" multiple fluid [typeahead]="false" />
                       </flex-cell>
@@ -246,7 +427,9 @@
                 </p-accordion-content>
               </p-accordion-panel>
               <p-accordion-panel value="1">
-                <p-accordion-header>Models</p-accordion-header>
+                <p-accordion-header>
+                  <div>Models <s-box op=".5"> (Open to show models)</s-box> </div>
+                </p-accordion-header>
                 <p-accordion-content>
 
                   <!-- Первая часть модели которые можно включить -->
@@ -283,7 +466,17 @@
                   <s-box block>
                     <flex-box gap="5px" jc="space-between" ai="center">
                       <flex-cell>
-                        <s-box mbe="10px" fz="18px" color="#49DE80" fw="700" block>
+                        <button class="btn" (click)="switchStatus('input_model' + item.name)">
+                          @if(!getStatus('input_model' + item.name)) {
+                          <i class="pi pi-plus"></i>
+                          } @else {
+                          <i class="pi pi-minus"></i>
+                          }
+                        </button>
+                      </flex-cell>
+                      <flex-cell g="1">
+                        <s-box role="button" style="cursor: pointer" tabindex="-1"
+                          (click)="switchStatus('input_model' + item.name)" fz="18px" color="#49DE80" fw="700" block>
                           <i class="pi pi-flag-fill"></i>
                           {{item.name}}
                         </s-box>
@@ -298,13 +491,16 @@
                         </flex-box>
                       </flex-cell>
                     </flex-box>
-                    <space-box size="5px"></space-box>
+
                     @if(item.fields.length > 0) {
+                    @if(getStatus('input_model' + item.name)) {
+                    <space-box size="5px"></space-box>
                     @for(field of item.fields; track field.name) {
                     <s-box block mbe="10px">
                       <flex-box gap="20px" ai="flex-start">
                         <flex-cell g="1">
-                          <app-field (onChange)="updateInputField(item, $event)" [modelNames]="avialableInputModelNames"
+                          <app-field [isPrismaField]="isPrismaField(item.name, field.name)"
+                            (onChange)="updateInputField(item, $event)" [modelNames]="avialableInputModelNames"
                             [enums]="allEnums" [extraModelNames]="extraModelNames" [field]="field"></app-field>
                         </flex-cell>
                         <flex-cell>
@@ -317,15 +513,23 @@
                       </flex-box>
                     </s-box>
                     }
-                    } @else {
-                    <s-box op=".7" block>
-                      <p>No fields</p>
-                    </s-box>
-                    }
+
                     <space-box size="10px"></space-box>
                     <button pButton (click)="toAddField(item, 'input')" pRipple severity="success">
                       Add Field
                     </button>
+                    }
+
+                    } @else {
+                    <s-box op=".7" block>
+                      <p>No fields</p>
+                    </s-box>
+
+                    <space-box size="10px"></space-box>
+                    <button pButton (click)="toAddField(item, 'input')" pRipple severity="success">
+                      Add Field
+                    </button>
+                    }
 
                   </s-box>
                   <s-box mb="10px" block>
@@ -348,16 +552,71 @@
             @if(submenuActiveItemId == '4') {
             <p-accordion [value]="['0']" [multiple]="true">
               <p-accordion-panel value="0">
-                <p-accordion-header>Input Config</p-accordion-header>
+                <p-accordion-header>Output Entities</p-accordion-header>
                 <p-accordion-content>
                   <flex-grid gap="10px">
                     <flex-box column>
+                      <s-box block class="alert">
+                        <flex-box ai="flex-start" gap="10px">
+                          <s-box fz="20px">
+                            <i class="pi pi-info-circle"></i>
+                          </s-box>
+                          <flex-cell>
+                            <h3 class="no-mg">📤 Output Models Info</h3>
+                            Output models define the structure of response data. Unlike input models, they <strong>can
+                              contain references</strong>
+                            and <strong>timestamp fields</strong> (e.g., createdAt, updatedAt).
+
+                            If <strong>Strict Mode</strong> is enabled, you must explicitly include models and fields in
+                            the configuration.
+
+                            <h4>🔹 Field Types in Output Models</h4>
+                            <ul>
+                              <li><strong>Prisma Fields</strong> – These fields come from Prisma models. You can mark
+                                them as required or exclude them,
+                                but their type cannot be changed.</li>
+                              <li><strong>Extra Fields</strong> – Fully customizable additional fields.</li>
+                            </ul>
+
+                            Need to include extra metadata or custom response fields?
+                            ✅ This generator supports extending output models effortlessly.
+                            Try it now:
+                            <a href="https://www.npmjs.com/package/@tsdiapi/cli" target="_blank">&#64;tsdiapi/cli on
+                              NPM</a>
+                            🚀
+                          </flex-cell>
+                        </flex-box>
+                      </s-box>
 
                       <flex-cell>
                         <label for="makeFieldsOptionalOutput">
                           <p-checkbox inputId="makeFieldsOptionalOutput" [(ngModel)]="makeFieldsOptionalOutput"
                             binary="true"></p-checkbox>
                           Make Fields Optional
+                        </label>
+                      </flex-cell>
+                      <flex-cell>
+                        <label for="excludeIdFieldsOutput">
+                          <p-checkbox inputId="excludeIdFieldsOutput" [(ngModel)]="excludeIdFieldsOutput"
+                            binary="true"></p-checkbox>
+                          Exclude Id Fields
+                        </label>
+                      </flex-cell>
+                      <flex-cell>
+                        <label for="excludeIdRelationFieldsOutput">
+                          <p-checkbox inputId="excludeIdRelationFieldsOutput"
+                            [(ngModel)]="excludeIdRelationFieldsOutput" binary="true"></p-checkbox>
+                          Exclude Reference Id Fields
+                        </label>
+                        <s-box fz=".8em" block color="yellow">The client **only emulates** the behavior of the *Exclude
+                          Reference Id Fields* option by detecting `Id` at the end of field names. However, the
+                          generator will **actually** exclude only keys that are referenced by relations.</s-box>
+                      </flex-cell>
+                      <flex-cell>
+                        <label for="excludeDateAtFieldsOutput">
+                          <p-checkbox inputId="excludeDateAtFieldsOutput" [(ngModel)]="excludeDateAtFieldsOutput"
+                            binary="true"></p-checkbox>
+                          Exclude Date At Fields
                         </label>
                       </flex-cell>
                       <flex-cell>
@@ -387,10 +646,11 @@
                 </p-accordion-content>
               </p-accordion-panel>
               <p-accordion-panel value="1">
-                <p-accordion-header>Models</p-accordion-header>
+                <p-accordion-header>
+                  <div>Models <s-box op=".5"> (Open to show models)</s-box></div>
+                </p-accordion-header>
                 <p-accordion-content>
 
-                  <!-- Первая часть модели которые можно включить -->
                   @if(modelsCanBeAddedToOutput.length > 0) {
                   <flex-grid gap="5px">
                     <flex-box wrap>
@@ -423,7 +683,17 @@
                   <s-box block>
                     <flex-box gap="5px" jc="space-between" ai="center">
                       <flex-cell>
-                        <s-box mbe="10px" fz="18px" color="#49DE80" fw="700" block>
+                        <button class="btn" (click)="switchStatus('output_model' + item.name)">
+                          @if(!getStatus('input_model' + item.name)) {
+                          <i class="pi pi-plus"></i>
+                          } @else {
+                          <i class="pi pi-minus"></i>
+                          }
+                        </button>
+                      </flex-cell>
+                      <flex-cell stretch g="1">
+                        <s-box role="button" style="cursor: pointer" tabindex="-1"
+                          (click)="switchStatus('output_model' + item.name)" fz="18px" color="#49DE80" fw="700" block>
                           <i class="pi pi-flag-fill"></i>
                           {{item.name}}
                         </s-box>
@@ -438,15 +708,18 @@
                         </flex-box>
                       </flex-cell>
                     </flex-box>
-                    <space-box size="5px"></space-box>
+
                     @if(item.fields.length > 0) {
+
+                    @if(getStatus('output_model' + item.name)) {
+                    <space-box size="5px"></space-box>
                     @for(field of item.fields; track field.name) {
                     <s-box block mbe="10px">
                       <flex-box gap="20px" ai="flex-start">
                         <flex-cell g="1">
-                          <app-field (onChange)="updateOutputField(item, $event)"
-                            [modelNames]="avialableOutputModelNames" [enums]="allEnums"
-                            [extraModelNames]="extraModelNames" [field]="field"></app-field>
+                          <app-field [isPrismaField]="isPrismaField(item.name, field.name)"
+                            (onChange)="updateOutputField(item, $event)" [modelNames]="avialableOutputModelNames"
+                            [enums]="allEnums" [extraModelNames]="extraModelNames" [field]="field"></app-field>
                         </flex-cell>
                         <flex-cell>
                           <s-box block pbs="22px">
@@ -458,15 +731,22 @@
                       </flex-box>
                     </s-box>
                     }
-                    } @else {
-                    <s-box op=".7" block>
-                      <p>No fields</p>
-                    </s-box>
-                    }
                     <space-box size="10px"></space-box>
                     <button pButton (click)="toAddField(item, 'output')" pRipple severity="success">
                       Add Field
                     </button>
+                    }
+
+                    } @else {
+                    <s-box op=".7" block>
+                      <p>No fields</p>
+                    </s-box>
+                    <space-box size="10px"></space-box>
+                    <button pButton (click)="toAddField(item, 'output')" pRipple severity="success">
+                      Add Field
+                    </button>
+                    }
+
 
                   </s-box>
                   <s-box mb="10px" block>
@@ -491,12 +771,37 @@
             }
             @if(submenuActiveItemId == '5') {
             <p-card header="Lists">
+              <s-box block class="alert">
+                <flex-box ai="flex-start" gap="10px">
+                  <s-box fz="20px">
+                    <i class="pi pi-info-circle"></i>
+                  </s-box>
+                  <flex-cell>
+                    <h3 class="no-mg">📋 List Models Info</h3>
+                    List models are customizable collections that allow defining structured data lists.
+
+                    <h4>🔹 How It Works?</h4>
+                    <ul>
+                      <li>You specify a <strong>List name</strong> (e.g., Cities).</li>
+                      <li>Define the <strong>model type</strong> for list elements.</li>
+                      <li>Configure additional settings:
+                        <ul>
+                          <li><strong>Pagination</strong> – Enable/disable paging.</li>
+                          <li><strong>Sorting</strong> – Define sorting capabilities.</li>
+                          <li><strong>Filters</strong> – Specify which filters are supported.</li>
+                        </ul>
+                      </li>
+                    </ul>
+                  </flex-cell>
+                </flex-box>
+              </s-box>
+
               <p-button pRipple label="Add List" type="button" (click)="toAddList()" icon="pi pi-plus"
                 class="p-button-success"></p-button>
               <space-box size="10px"></space-box>
               @for(item of lists; track item.modelName) {
-              <s-box pd="5px" block>
-                <flex-box ai="flex-start" gap="15px">
+              <s-box pd="5px" bgc="#000" br="10px" mbe="10px" pd="10px" block>
+                <flex-box ai="center" gap="15px">
                   <flex-cell w="120px">
                     <s-box fz="18px" fw="700" color="#49DE80">
                       <i class="pi pi-list"></i> {{item.modelName}}
@@ -513,14 +818,13 @@
                   <flex-cell>
                     <label>
                       Pagination
-                      <br>
                       <p-checkbox (onChange)="listFieldUpdated(item)" [(ngModel)]="item.pagination"
                         binary="true"></p-checkbox>
                     </label>
                   </flex-cell>
                   <flex-cell>
                     <label>
-                      Orderable <br>
+                      Orderable
                       <p-checkbox (onChange)="listFieldUpdated(item)" [(ngModel)]="item.orderable"
                         binary="true"></p-checkbox>
                     </label>
@@ -581,7 +885,10 @@
 
     </flex-cell>
   </flex-box>
-
+  <flex-box class="copyright" center>
+    <s-box block ta="center" op=".8">© 2025 Unbywyd. All rights reserved. Visit us at <a
+        href="https://unbywyd.com">unbywyd.com</a></s-box>
+  </flex-box>
 </flex-canvas>
 
 <p-dialog header="Add Enum" [(visible)]="showAddEnumDialog" [style]="{ width: '500px' }">
@@ -700,7 +1007,7 @@
   <space-box size="10px"></space-box>
   <flex-box gap="10px">
 
-    <button pButton type="button" label="Cancel" type="button" (click)="showAddModelDialog = false"
+    <button pButton type="button" label="Cancel" type="button" (click)="showAddFieldDialog = false"
       class="p-button-text"></button>
     @if(!currentListItem) {
     <button pButton type="button" label="Add Field" type="button" [disabled]="!newFieldName"

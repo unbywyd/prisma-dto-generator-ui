@@ -13,6 +13,9 @@ interface PrismaClassDTOGeneratorModelConfig {
     excludeFields?: string[]; // Поля, которые нужно исключить из модели
     excludeModels?: string[]; // Модели, которые нужно исключить
     makeFieldsOptional?: boolean; // Сделать все поля опциональными
+    excludeIdFields?: boolean; // Исключить поля с идентификаторами
+    excludeIdRelationFields?: boolean; // Исключить поля с идентификаторами реляций
+    excludeDateAtFields?: boolean; // Исключить поля с датами создания
     excludeModelFields?: {
         [modelName: string]: string[]; // Исключенные поля для каждой модели
     };

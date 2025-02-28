@@ -1,6 +1,7 @@
 import { Component, ElementRef, EventEmitter, Input, Output, ViewChild } from '@angular/core';
 import JSONEditor, { JSONEditorOptions } from 'jsoneditor';
 import { ListItem, ModelField, ModelType, PrismaClassDTOGeneratorConfig } from '../../dto-parser';
+import { OutputSchemaDTO } from '../../../generated/openapi';
 
 function capitalizeFirstLetter(str: string): string {
   if (!str) return str;
@@ -17,6 +18,7 @@ function capitalizeFirstLetter(str: string): string {
 export class JsonEditorComponent {
   @ViewChild('editorContainer', { static: true }) editorContainer!: ElementRef;
 
+  @Input() prismaData: OutputSchemaDTO | null = null;
   private editor!: JSONEditor;
   @Input() value: any;
   @Output() valueChange = new EventEmitter<any>();
@@ -72,8 +74,10 @@ export class JsonEditorComponent {
   }
   addInputModel(model: ModelType) {
     this.provideEmptyInputModel(model.name);
+
     if (model.fields?.length) {
-      this.addFieldsToInputModel(model.name, model.fields);
+      const prismaFields = this?.prismaData?.models?.find(m => m.name === model.name)?.fields;
+      this.addFieldsToInputModel(model.name, prismaFields || model.fields);
     }
   }
   addOutputModel(model: ModelType) {
@@ -188,15 +192,35 @@ export class JsonEditorComponent {
     this.setJSON(state);
   }
   addFieldsToInputModel(modelName: string, _fields: Array<ModelField>): void {
-    let fields = this.filterFieldKeys(_fields);
     const state = this.currentState;
 
     const excludeFields = state.input?.excludeFields || [];
-    fields = fields.filter(f => !excludeFields.includes(f.name));
+
+    const excludeIdField = state.input?.excludeIdFields || false;
+    const excludeIdRelationFields = state.input?.excludeIdRelationFields || false;
+    const excludeDateAtFields = state.input?.excludeDateAtFields || false;
+
+    let fields = _fields.filter(f => {
+
+      if (excludeFields.includes(f.name)) {
+        return false;
+      }
+      if (excludeIdField && f?.isId) {
+        return false;
+      }
+      if (excludeDateAtFields && f.type == 'DateTime' && f.name.toLowerCase().endsWith('at')) {
+        return false;
+      }
+      if (excludeIdRelationFields && f.type == "String" && f.name.endsWith("Id")) {
+        return false;
+      }
+
+      return true;
+    });
     if (!fields.length) {
       return
     }
-
+    fields = this.filterFieldKeys(fields);
     if (!state.input) {
       state.input = {
         extendModels: {},

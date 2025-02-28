@@ -1,5 +1,5 @@
 .app-container {
-  min-height: 100vh;
+  min-height: 100dvh;
   height: 100%;
   > flex-grid {
     height: 100%;
@@ -13,5 +13,84 @@
 }
 .scrollbox {
   overflow-y: auto;
-  max-height: calc(100vh - 160px);
+  max-height: calc(100dvh - 170px);
+}
+
+.alert {
+  display: flex;
+  gap: 10px;
+  background: linear-gradient(
+    135deg,
+    #0a2a43,
+    #154e81
+  ); /* Темный сине-голубой градиент */
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+  color: #d0eaff; /* Светло-голубой текст */
+  padding: 10px;
+  border-radius: 12px;
+  margin: 10px 0;
+  font-size: 12px;
+  &.warning {
+    background: linear-gradient(
+      135deg,
+      #543106,
+      #c26a00
+    ); /* Оранжевый градиент */
+  }
+}
+
+pre {
+  font-family: inherit;
+}
+.primary {
+  font-weight: 70;
+  background: linear-gradient(
+    90deg,
+    #66ff00,
+    #ffee00,
+    #ff0080,
+    #9831ff,
+    #00e1ff
+  );
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  display: inline-block;
+}
+
+.btn {
+  width: 40px;
+  display: flex;
+  height: 40px;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  background: none;
+  cursor: pointer;
+}
+.td-none {
+  text-decoration: none;
+  color: inherit;
+}
+
+.copyright {
+  position: fixed;
+  bottom: 0;
+  right: 0;
+  left: 0;
+  padding: 5px;
+  background-color: rgba(#000, 0.6);
+  backdrop-filter: blur(10px);
+  z-index: 99;
+}
+.desc {
+  h2,
+  p {
+    margin: 0;
+  }
+  h2 {
+    font-size: 12px;
+  }
+  p {
+    font-size: 10px;
+  }
 }

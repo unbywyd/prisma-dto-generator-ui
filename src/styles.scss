@@ -9,7 +9,6 @@ body {
   font-size: 14px;
 }
 
-
 .no-mg {
   margin: 0;
 }
@@ -18,7 +17,6 @@ body {
   background: var(--p-primary-900);
   border-radius: inherit;
 }
-
 
 // custom style for scroll of browser
 
@@ -33,11 +31,61 @@ body {
 
 /* Handle */
 ::-webkit-scrollbar-thumb {
-  background: #49DE80;
+  background: #49de80;
   border-radius: 12px;
 }
 
 /* Handle on hover */
 ::-webkit-scrollbar-thumb:hover {
   background: #555;
+}
+
+body {
+  .introjs-tooltip {
+    background-color: rgba(#000, 0.4);
+    max-width: 600px;
+    min-width: 300px;
+    backdrop-filter: blur(10px);
+    border-radius: 10px;
+    .introjs-tooltiptext {
+      &,
+      li,
+      a,
+      h2,
+      h3,
+      h4,
+      h5,
+      p {
+        font-family: Arial, Helvetica, sans-serif !important;
+        line-height: 1.4;
+        font-size: 14px;
+      }
+    }
+    a {
+      &,
+      &:hover {
+        color: #49de80;
+      }
+    }
+  }
+  .introjs-progress {
+    background: linear-gradient(to right, #656c6f, #383b3d );
+  }
+  .introjs-progressbar {
+    background: linear-gradient(to right, #0099ff, #49de80);
+  }
+  pre {
+    background: linear-gradient(135deg, #0a2a43, #15817c);
+    padding: 20px;
+    border-left: 3px solid #49de80;
+    color: #fff;
+    border-radius: 5px;
+    line-height: 1.5;
+    overflow-x: auto;
+    font-size: 12px;
+    code {
+      font-size: 12px;
+      line-height: 1.5;
+    }
+  }
 }

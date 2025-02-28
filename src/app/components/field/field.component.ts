@@ -43,7 +43,7 @@ export class FieldComponent {
   @Input() modelNames: Array<string> = [];
   @Input() simpleTypesMode: boolean = false;
   @Input() enums: Array<string> = [];
-
+  @Input() isPrismaField: boolean = false;
   id: string = '';
   @Output() onChange: EventEmitter<ModelField> = new EventEmitter<ModelField>();
 
@@ -90,6 +90,9 @@ export class FieldComponent {
     isExtra: new FormControl(false),
     isList: new FormControl(false),
   });
+
+
+
 
   get isRelation(): boolean {
     return this.form.get('fieldType')?.value === 'Relation';
@@ -182,6 +185,7 @@ export class FieldComponent {
         this.buildField();
       }
     });
+
   }
 
   buildField() {
